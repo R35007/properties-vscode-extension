@@ -1,0 +1,104 @@
+{
+	"name": "properties",
+	"displayName": "Properties",
+	"description": "Get file or Folder Properties",
+	"version": "1.0.0",
+	"publisher": "Thinker",
+	"license": "MIT",
+	"icon": "logo.png",
+	"author": {
+		"name": "Sivaraman",
+		"email": "sendmsg2siva@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/R35007/properties-vscode-extension"
+	},
+	"engines": {
+		"vscode": "^1.73.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:properties.show"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "properties.show",
+				"title": "Properties"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Properties Configuration",
+			"properties": {
+				"properties.settings.dateTimeFormat": {
+					"type": "string",
+					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+				},
+				"properties.settings.disableRelativeTimestamps": {
+					"type": "boolean",
+					"default": false,
+					"description": "Turns off relative timestamp display."
+				}
+			}
+		},
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "properties.show",
+					"when": "sideBarFocus && activeViewlet == 'workbench.view.explorer'"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "properties.show",
+					"when": "isFileSystemResource"
+				}
+			],
+			"editor/title/context": [
+				{
+					"command": "properties.show",
+					"when": "isFileSystemResource"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "properties.show",
+					"when": "false"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/dateformat": "^3.0.1",
+		"@types/get-folder-size": "^3.0.1",
+		"@types/mime": "^3.0.1",
+		"@types/node": "^14.18.33",
+		"@types/vscode": "^1.73.0",
+		"@typescript-eslint/eslint-plugin": "^5.16.0",
+		"@typescript-eslint/parser": "^5.16.0",
+		"eslint": "^8.11.0",
+		"typescript": "^4.5.5"
+	},
+	"dependencies": {
+		"@types/image-size": "^0.8.0",
+		"dateformat": "^4.6.3",
+		"get-folder-size": "^4.0.0",
+		"i": "^0.3.7",
+		"image-size": "^1.0.2",
+		"mime": "^3.0.0",
+		"npm": "^9.1.1"
+	}
+}
