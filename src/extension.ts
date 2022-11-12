@@ -30,14 +30,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const baseDetails =
 				`Name      : ${name}
+				 Extension : ${extension.replace(".", "")}
 				 Type      : ${type}
-				 Extension : ${extension}
 				 Size      : ${size}`;
 
 			const dimensionDetails = dimensions ?
-				`Dimensions :${dimensions?.width} x ${dimensions?.height}
-				 width : ${dimensions?.width} pixels
-				 height : ${dimensions?.height} pixels` : "";
+				`Dimensions : ${dimensions?.width} x ${dimensions?.height} pixels
+				 width      : ${dimensions?.width} pixels
+				 height     : ${dimensions?.height} pixels` : "";
 
 			const locationDetails =
 				`Location  : ${args.fsPath}

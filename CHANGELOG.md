@@ -1,9 +1,9 @@
 # Change Log
 
-All notable changes to the "properties" extension will be documented in this file.
+## [v2.0.0]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Typo fix
 
-## [Unreleased]
+## [v1.0.0]
 
 - Initial release
