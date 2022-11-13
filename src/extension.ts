@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as path from "path";
 import * as mime from "mime";
-import { convertBytes, dirSize, formatDate, imageDimension } from './helpers';
+import { convertBytes, dirSize, formatDate, imageDimension, toString } from './helpers';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -28,28 +28,35 @@ export function activate(context: vscode.ExtensionContext) {
 			const mimeType = mime.getType(fsPath) || '[unknown]';
 			const dimensions = imageDimension(fsPath);
 
-			const baseDetails =
-				`Name      : ${name}
-				 Extension : ${extension.replace(".", "")}
-				 Type      : ${type}
-				 Size      : ${size}`;
+			const baseDetails = toString([
+				["Name", name],
+				["Extension", type === 'File' ? extension.replace(".", "") : ''],
+				["Type", type],
+				["Size", size]
+			]);
 
 			const dimensionDetails = dimensions ?
-				`Dimensions : ${dimensions?.width} x ${dimensions?.height} pixels
-				 width      : ${dimensions?.width} pixels
-				 height     : ${dimensions?.height} pixels` : "";
+				toString([
+					["Dimensions", `${dimensions?.width} x ${dimensions?.height} pixels`],
+					["width", `${dimensions?.width} pixels`],
+					["height", `${dimensions?.height} pixels`],
+				]) : "";
 
-			const locationDetails =
-				`Location  : ${args.fsPath}
-			   Directory : ${directory}`;
+			const locationDetails = toString([
+				['Location', args.fsPath],
+				['Directory', directory],
+			]);
 
-			const timestampDetails =
-				`Created   : ${created}
-			   Changed   : ${changed}
-			   Modified  : ${modified}
-			   Accessed  : ${accessed}`;
+			const timestampDetails = toString([
+				['Created', created],
+				['Changed', changed],
+				['Modified', modified],
+				['Accessed', accessed]
+			]);
 
-			const mimeTypeDetails = `Mime Type : ${mimeType}`;
+			const mimeTypeDetails = toString([
+				['Mime Type', type === 'File' ? mimeType : ""]
+			]);
 
 			const result = [baseDetails, dimensionDetails, locationDetails, timestampDetails, mimeTypeDetails]
 				.filter(Boolean)

@@ -1,5 +1,9 @@
 # Change Log
 
+## [v3.0.0]
+
+- Hide extension and mimetype for folder properties.
+
 ## [v2.0.0]
 
 - Typo fix

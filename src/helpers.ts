@@ -1,12 +1,13 @@
 import * as dateformat from "dateformat";
-import { readdir, stat } from 'fs/promises';
 import { Settings } from './Settings';
 import * as path from "path";
+import * as fs from "fs/promises";
 import imageSize from "image-size";
+import * as moment from "moment";
 
 
 export const dirSize = async (dir: string) => {
-  const files = await readdir(dir, { withFileTypes: true });
+  const files = await fs.readdir(dir, { withFileTypes: true });
 
   const filePaths: Array<Promise<number>> = files.map(async file => {
     const filePath = path.join(dir, file.name);
@@ -14,7 +15,7 @@ export const dirSize = async (dir: string) => {
     if (file.isDirectory()) return await dirSize(filePath);
 
     if (file.isFile()) {
-      const { size } = await stat(filePath);
+      const { size } = await fs.stat(filePath);
       return size;
     }
     return 0;
@@ -38,7 +39,7 @@ export const formatDate = (date: Date) => {
 
   if (Settings.disableRelativeTimestamps) return absolute;
 
-  const relative = formatDateRelative(date);
+  const relative = moment(date).fromNow();
   return `${absolute} (${relative})`;
 };
 
@@ -51,19 +52,8 @@ export const imageDimension = (imagePath: string) => {
   }
 };
 
-const formatDateRelative = (date: Date) => {
-  const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
-  const delta = -(new Date().getTime() - date.getTime());
-  const units: Array<[any, number]> = [
-    ['year', 31536000000],
-    ['month', 2628000000],
-    ['day', 86400000],
-    ['hour', 3600000],
-    ['minute', 60000],
-    ['second', 1000],
-  ];
-  for (let [unit, amount] of units) {
-    if (Math.abs(delta) > amount || unit === 'second')
-      return formatter.format(Math.round(delta / amount), unit);
-  }
+export const toString = (list: any[]) => {
+  return list.filter(([key, val]) => val)
+    .map(([key, val]) => `${key} : ${val}`)
+    .join("\n");
 };
