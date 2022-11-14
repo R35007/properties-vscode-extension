@@ -15,7 +15,25 @@ export class Settings {
   static get dateTimeFormat() {
     return Settings.getSettings("dateTimeFormat") as string || '';
   }
-  static get disableRelativeTimestamps() {
-    return Settings.getSettings("disableRelativeTimestamps") as boolean;
+  static get timeStamps() {
+    return Settings.getSettings("timeStamps") as {
+      "createdTimestamp": boolean,
+      "changedTimestamp": boolean,
+      "accessedTimestamp": boolean,
+      "modifiedTimestamp": boolean,
+      "relativeTimestamp": boolean
+    };
+  }
+  static get audioMetaData() {
+    return Settings.getSettings("audioMetaData") as {
+      "title": boolean,
+      "album": boolean,
+      "artist": boolean,
+      "genre": boolean,
+      "year": boolean
+    };
+  }
+  static get showDuration() {
+    return Settings.getSettings("showDuration") as boolean;
   }
 }

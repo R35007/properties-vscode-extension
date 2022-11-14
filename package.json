@@ -2,10 +2,10 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "3.0.0",
+	"version": "4.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
-	"icon": "logo.png",
+	"icon": "images/logo.png",
 	"author": {
 		"name": "Sivaraman",
 		"email": "sendmsg2siva@gmail.com"
@@ -18,27 +18,33 @@
 		"vscode": "^1.73.0"
 	},
 	"keywords": [
-    "File",
-    "Folder",
-    "Properties",
-    "File properties",
-    "Folder properties",
-    "Image",
-    "Image properties",
-    "Dimensions",
-    "Image dimensions",
-    "mime type",
-    "mime",
-    "folder size",
-    "file size",
-    "size",
+		"File",
+		"Folder",
+		"Properties",
+		"File properties",
+		"Folder properties",
+		"Image",
+		"Image properties",
+		"Audio properties",
+		"Video properties",
+		"durations",
+		"Audio durations",
+		"Video durations",
+		"Dimensions",
+		"Image dimensions",
+		"mime type",
+		"mime",
+		"folder size",
+		"file size",
+		"size",
 		"timestamp"
-  ],
+	],
 	"categories": [
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:properties.show"
+		"onCommand:properties.show",
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -53,13 +59,100 @@
 			"title": "Properties Configuration",
 			"properties": {
 				"properties.settings.dateTimeFormat": {
+					"order": 1,
 					"type": "string",
 					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
 				},
-				"properties.settings.disableRelativeTimestamps": {
+				"properties.settings.showDuration": {
+					"order": 2,
 					"type": "boolean",
-					"default": false,
-					"description": "Turns off relative timestamp display."
+					"default": true,
+					"description": "Show audio / video duration. May take few seconds to get duration."
+				},
+				"properties.settings.audioMetaData": {
+					"order": 8,
+					"type": "object",
+					"default": {
+						"title": true,
+						"album": true,
+						"artist": true,
+						"genre": true,
+						"year": true
+					},
+					"properties": {
+						"title": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio title."
+						},
+						"album": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio album."
+						},
+						"artist": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio artist."
+						},
+						"genre": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio genre."
+						},
+						"year": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio year."
+						},
+						"duration": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show audio duration."
+						}
+					},
+					"description": "Add Default middlewares.",
+					"additionalProperties": false
+				},
+				"properties.settings.timeStamps": {
+					"order": 8,
+					"type": "object",
+					"default": {
+						"createdTimestamp": true,
+						"changedTimestamp": true,
+						"accessedTimestamp": true,
+						"modifiedTimestamp": true,
+						"relativeTimestamp": false
+					},
+					"properties": {
+						"createdTimestamp": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show created timestamp."
+						},
+						"changedTimestamp": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show changed timestamp."
+						},
+						"accessedTimestamp": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show accessed timestamp."
+						},
+						"modifiedTimestamp": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show modified timestamp."
+						},
+						"relativeTimestamp": {
+							"type": "boolean",
+							"default": false,
+							"description": "Disable relative timestamp."
+						}
+					},
+					"description": "Add Default middlewares.",
+					"additionalProperties": false
 				}
 			}
 		},
@@ -101,8 +194,11 @@
 	"devDependencies": {
 		"@types/dateformat": "^3.0.1",
 		"@types/get-folder-size": "^3.0.1",
+		"@types/humanize-duration": "^3.27.1",
+		"@types/image-size": "^0.8.0",
 		"@types/mime": "^3.0.1",
 		"@types/moment": "^2.13.0",
+		"@types/musicmetadata": "^2.0.6",
 		"@types/node": "^14.18.33",
 		"@types/vscode": "^1.73.0",
 		"@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -111,13 +207,14 @@
 		"typescript": "^4.5.5"
 	},
 	"dependencies": {
-		"@types/image-size": "^0.8.0",
 		"dateformat": "^4.6.3",
 		"get-folder-size": "^4.0.0",
-		"i": "^0.3.7",
+		"get-video-duration": "^4.1.0",
+		"humanize-duration": "^3.27.3",
 		"image-size": "^1.0.2",
 		"mime": "^3.0.0",
 		"moment": "^2.29.4",
+		"musicmetadata": "^2.0.5",
 		"npm": "^9.1.1"
 	}
 }

@@ -2,7 +2,10 @@ import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as path from "path";
 import * as mime from "mime";
-import { convertBytes, dirSize, formatDate, imageDimension, toString } from './helpers';
+import { convertBytes, dirSize, formatDate, imageDimension, toString, musicMetaData, videoMetaData } from './helpers';
+import { Settings } from './Settings';
+import * as humanizeDuration from "humanize-duration";
+
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -26,11 +29,13 @@ export function activate(context: vscode.ExtensionContext) {
 			const modified = formatDate(stat.mtime) || "";
 			const accessed = formatDate(stat.atime) || "";
 			const mimeType = mime.getType(fsPath) || '[unknown]';
-			const dimensions = imageDimension(fsPath);
+			const dimensions = mimeType.includes('image') ? imageDimension(fsPath) : "";
+			const musicmetadata = mimeType.includes('audio') ? await musicMetaData(fsPath) : "";
+			const videometadata = mimeType.includes('video') ? await videoMetaData(fsPath) : "";
 
 			const baseDetails = toString([
-				["Name", name],
-				["Extension", type === 'File' ? extension.replace(".", "") : ''],
+				["Name", type === 'File' ? name : title],
+				["Extension", extension, type === 'File'],
 				["Type", type],
 				["Size", size]
 			]);
@@ -38,8 +43,23 @@ export function activate(context: vscode.ExtensionContext) {
 			const dimensionDetails = dimensions ?
 				toString([
 					["Dimensions", `${dimensions?.width} x ${dimensions?.height} pixels`],
-					["width", `${dimensions?.width} pixels`],
-					["height", `${dimensions?.height} pixels`],
+					["Width", `${dimensions?.width} pixels`],
+					["Height", `${dimensions?.height} pixels`],
+				]) : "";
+
+			const audioDetails = musicmetadata ?
+				toString([
+					["Title", musicmetadata.title, Settings.audioMetaData.title],
+					["Album", musicmetadata.album, Settings.audioMetaData.album],
+					["Artist", musicmetadata.artist.join(', '), Settings.audioMetaData.artist],
+					["Genre", musicmetadata.genre.join(', '), Settings.audioMetaData.genre],
+					["Year", musicmetadata.year, Settings.audioMetaData.year],
+					["Duration", humanizeDuration(musicmetadata.duration * 1000, { maxDecimalPoints: 2 }), Settings.showDuration && musicmetadata.duration],
+				]) : "";
+
+			const videoDetails = videometadata ?
+				toString([
+					["Duration", humanizeDuration(videometadata.duration * 1000, { maxDecimalPoints: 2 }), Settings.showDuration && videometadata.duration],
 				]) : "";
 
 			const locationDetails = toString([
@@ -48,17 +68,17 @@ export function activate(context: vscode.ExtensionContext) {
 			]);
 
 			const timestampDetails = toString([
-				['Created', created],
-				['Changed', changed],
-				['Modified', modified],
-				['Accessed', accessed]
+				['Created', created, Settings.timeStamps.createdTimestamp],
+				['Changed', changed, Settings.timeStamps.changedTimestamp],
+				['Modified', modified, Settings.timeStamps.modifiedTimestamp],
+				['Accessed', accessed, Settings.timeStamps.accessedTimestamp]
 			]);
 
 			const mimeTypeDetails = toString([
-				['Mime Type', type === 'File' ? mimeType : ""]
+				['Mime Type', mimeType, type === 'File']
 			]);
 
-			const result = [baseDetails, dimensionDetails, locationDetails, timestampDetails, mimeTypeDetails]
+			const result = [baseDetails, dimensionDetails, audioDetails, videoDetails, locationDetails, timestampDetails, mimeTypeDetails]
 				.filter(Boolean)
 				.join('\n----------------------------------------------------------------------\n');
 
