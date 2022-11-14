@@ -2,10 +2,11 @@
 
 Get file or Folder Properties.
 
+- File Name and Extension.
 - File or Folder size.
+- Number of files and folders inside folder properties.
 - Image dimensions. `width` x `height`.
-- File Extension.
-- File or Folder `Location` and `Directory` path.
+- File or Folder `Directory` and `Location` of a file or folder.
 - Audio `title`, `album`, `artist`, `genre`, `year`, `duration`.
 - Video `duration`.
 - Timestamp of `created`, `changed`, `modified`, `accessed` with relative timestamp .

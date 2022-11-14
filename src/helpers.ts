@@ -8,23 +8,6 @@ import * as moment from "moment";
 import * as musicmetadata from 'musicmetadata';
 import { getVideoDurationInSeconds } from 'get-video-duration';
 
-export const dirSize = async (dir: string) => {
-  const files = await fsProm.readdir(dir, { withFileTypes: true });
-
-  const filePaths: Array<Promise<number>> = files.map(async file => {
-    const filePath = path.join(dir, file.name);
-
-    if (file.isDirectory()) return await dirSize(filePath);
-
-    if (file.isFile()) {
-      const { size } = await fsProm.stat(filePath);
-      return size;
-    }
-    return 0;
-  });
-
-  return (await Promise.all(filePaths)).flat(Infinity).reduce((i, size) => i + size, 0);
-};
 
 // Converts the file size from Bytes to KB | MB | GB | TB
 export const convertBytes = (bytes: number): string => {
@@ -33,6 +16,77 @@ export const convertBytes = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   if (i === 0) return bytes + ' ' + sizes[i];
   return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + ` (${bytes} bytes)`;
+};
+
+export const toString = (list: any[]) => {
+  return list.filter(([key, val, show = true]) => val && show)
+    .map(([key, val]) => `${key} : ${val}`)
+    .join("\n");
+};
+
+const getDeepStats = async (fsPath: string): Promise<fs.Stats[]> => {
+  const files = await fsProm.readdir(fsPath, { withFileTypes: true });
+
+  const statsList = files.map(async file => {
+    const filePath = path.join(fsPath, file.name);
+
+    const fsStats = await fsProm.stat(filePath);
+
+    if (file.isFile()) return [fsStats];
+
+    // If Directory then get all nested files and folder stats
+    const fsStatsList = await getDeepStats(filePath);
+    return [fsStats, ...fsStatsList];
+  });
+
+  const fsStatsList = await Promise.all(statsList);
+
+  return fsStatsList.flat(Infinity).filter(Boolean) as fs.Stats[];
+};
+
+export const getStats = async (fsPath: string) => {
+  const stats = await fsProm.stat(fsPath);
+  const extension = path.extname(fsPath) || "[none]";
+  const fileName = path.basename(fsPath);
+  const location = fsPath;
+  const directory = path.dirname(fsPath);
+  const baseName = path.basename(fsPath, extension);
+  const isFile = stats.isFile();
+  const type = isFile ? "File" : "Folder";
+  const created = stats.birthtime;
+  const changed = stats.ctime;
+  const modified = stats.mtime;
+  const accessed = stats.atime;
+  let size = stats.size;
+  let contains;
+
+  if (stats.isDirectory()) {
+    const allStats = await getDeepStats(fsPath);
+
+    contains = {
+      files: allStats.filter(stat => stat.isFile()).length,
+      folders: allStats.filter(stat => stat.isDirectory()).length,
+    };
+
+    const folderSize = allStats.filter(stat => stat.isFile).reduce((res, stat) => res + stat.size, 0);
+    size = folderSize;
+  }
+
+  return {
+    extension,
+    fileName,
+    location,
+    directory,
+    baseName,
+    type,
+    isFile,
+    created,
+    changed,
+    modified,
+    accessed,
+    size,
+    contains
+  };
 };
 
 export const formatDate = (date: Date) => {
@@ -45,7 +99,7 @@ export const formatDate = (date: Date) => {
   return `${absolute} (${relative})`;
 };
 
-export const imageDimension = (imagePath: string) => {
+export const getImageDetails = (imagePath: string) => {
   try {
     const dimensions = imageSize(imagePath);
     return dimensions;
@@ -54,13 +108,8 @@ export const imageDimension = (imagePath: string) => {
   }
 };
 
-export const toString = (list: any[]) => {
-  return list.filter(([key, val, show = true]) => val && show)
-    .map(([key, val]) => `${key} : ${val}`)
-    .join("\n");
-};
 
-export const musicMetaData = async (audioPath: string): Promise<MM.Metadata | undefined> => {
+export const getAudioDetails = async (audioPath: string): Promise<MM.Metadata | undefined> => {
   try {
     var readableStream = fs.createReadStream(audioPath);
     const result = await new Promise((resolve, reject) => {
@@ -78,7 +127,7 @@ export const musicMetaData = async (audioPath: string): Promise<MM.Metadata | un
 };
 
 // TODO: Now we get only duration. We need try to get other video information as well
-export const videoMetaData = async (videoPath: string) => {
+export const getVideoDetails = async (videoPath: string) => {
   try {
     if (!Settings.showDuration) return;
     var readableStream = fs.createReadStream(videoPath);
