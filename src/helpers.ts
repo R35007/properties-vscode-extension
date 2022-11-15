@@ -1,12 +1,13 @@
 import * as dateformat from "dateformat";
-import { Settings } from './Settings';
-import * as path from "path";
-import * as fsProm from "fs/promises";
 import * as fs from "fs";
+import * as fsProm from "fs/promises";
+import { getVideoDurationInSeconds } from 'get-video-duration';
 import imageSize from "image-size";
 import * as moment from "moment";
 import * as musicmetadata from 'musicmetadata';
-import { getVideoDurationInSeconds } from 'get-video-duration';
+import * as path from "path";
+import * as vscode from 'vscode';
+import { Settings } from './Settings';
 
 
 // Converts the file size from Bytes to KB | MB | GB | TB
@@ -48,8 +49,6 @@ export const getStats = async (fsPath: string) => {
   const stats = await fsProm.stat(fsPath);
   const extension = path.extname(fsPath) || "[none]";
   const fileName = path.basename(fsPath);
-  const location = fsPath;
-  const directory = path.dirname(fsPath);
   const baseName = path.basename(fsPath, extension);
   const isFile = stats.isFile();
   const type = isFile ? "File" : "Folder";
@@ -57,8 +56,28 @@ export const getStats = async (fsPath: string) => {
   const changed = stats.ctime;
   const modified = stats.mtime;
   const accessed = stats.atime;
+
+  let location = fsPath.replace(/\\/g, "/");
+  let directory = path.dirname(fsPath).replace(/\\/g, "/");
+
   let size = stats.size;
   let contains;
+  let workspace;
+
+  const workSpaceFolders = vscode.workspace.workspaceFolders;
+  if (workSpaceFolders?.length) {
+
+    // get the nearest workspace folder
+    const currentWorkSpace = workSpaceFolders
+      .filter(wsf => fsPath.includes(wsf.uri.fsPath))
+      .sort((a, b) => b.uri.fsPath.length - a.uri.fsPath.length)[0];
+
+    workspace = {
+      name: currentWorkSpace.name,
+      fsPath: currentWorkSpace.uri.fsPath.replace(/\\/g, "/")
+    };
+  }
+
 
   if (stats.isDirectory()) {
     const allStats = await getDeepStats(fsPath);
@@ -72,11 +91,17 @@ export const getStats = async (fsPath: string) => {
     size = folderSize;
   }
 
+  // Set relative path to workspace
+  if (Settings.paths.relativeToRoot && workspace) {
+    directory = "./" + path.relative(workspace.fsPath, directory).replace(/\\/g, "/");
+    location = "./" + path.relative(workspace.fsPath, location).replace(/\\/g, "/");
+  }
+
   return {
     extension,
     fileName,
-    location,
     directory,
+    location,
     baseName,
     type,
     isFile,
@@ -85,7 +110,8 @@ export const getStats = async (fsPath: string) => {
     modified,
     accessed,
     size,
-    contains
+    contains,
+    workspace
   };
 };
 
@@ -93,7 +119,7 @@ export const formatDate = (date: Date) => {
   const dateTimeFormat = Settings.dateTimeFormat?.trim();
   const absolute = dateTimeFormat ? dateformat(date, dateTimeFormat) : date.toLocaleString();
 
-  if (Settings.timeStamps.relativeTimestamp) return absolute;
+  if (!Settings.timeStamps.relativeTimestamp) return absolute;
 
   const relative = moment(date).fromNow();
   return `${absolute} (${relative})`;

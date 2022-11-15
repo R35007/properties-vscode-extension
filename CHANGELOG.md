@@ -1,5 +1,9 @@
 # Change Log
 
+## [v6.0.0]
+
+- Added settings `properties.settings.relativeToRoot` - to show `Location` and `Directory` relative to workspace folder
+
 ## [v5.0.0]
 
 - Now it shows number of folders and files inside the folder properties.

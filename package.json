@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "5.0.0",
+	"version": "6.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -63,6 +63,40 @@
 					"type": "string",
 					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
 				},
+				"properties.settings.paths": {
+					"order": 8,
+					"type": "object",
+					"default": {
+						"root": true,
+						"directory": true,
+						"location": true,
+						"relativeToRoot": false
+					},
+					"properties": {
+						"root": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show workspace folder path. It shows only when properties.settings.relativeToWorkspace is set to true"
+						},
+						"directory": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show directory path."
+						},
+						"location": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show file or folder location."
+						},
+						"relativeToRoot": {
+							"type": "boolean",
+							"default": false,
+							"description": "Show Directory and Location relative to workspace folder."
+						}
+					},
+					"description": "Add Default middlewares.",
+					"additionalProperties": false
+				},
 				"properties.settings.showDuration": {
 					"order": 2,
 					"type": "boolean",
@@ -122,7 +156,7 @@
 						"changedTimestamp": true,
 						"accessedTimestamp": true,
 						"modifiedTimestamp": true,
-						"relativeTimestamp": false
+						"relativeTimestamp": true
 					},
 					"properties": {
 						"createdTimestamp": {
@@ -147,8 +181,8 @@
 						},
 						"relativeTimestamp": {
 							"type": "boolean",
-							"default": false,
-							"description": "Disable relative timestamp."
+							"default": true,
+							"description": "Show relative timestamp."
 						}
 					},
 					"description": "Add Default middlewares.",

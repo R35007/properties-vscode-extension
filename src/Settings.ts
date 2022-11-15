@@ -33,6 +33,14 @@ export class Settings {
       "year": boolean
     };
   }
+  static get paths() {
+    return Settings.getSettings("paths") as {
+      "root": boolean,
+      "directory": boolean,
+      "location": boolean,
+      "relativeToRoot": boolean
+    };
+  }
   static get showDuration() {
     return Settings.getSettings("showDuration") as boolean;
   }
