@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "7.0.0",
+	"version": "7.0.1",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",

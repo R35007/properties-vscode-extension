@@ -88,6 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
 						if (action) {
 							const copyText = Settings.copyAction === "Properties" ? `${stats.fileName}\n\n${result}` : stats.location;
 							vscode.env.clipboard.writeText(copyText);
+							vscode.window.showInformationMessage(`${Settings.copyAction} Copied to clipboard 📋!`);
 						}
 					});
 			});
