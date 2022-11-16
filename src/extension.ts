@@ -27,8 +27,8 @@ export function activate(context: vscode.ExtensionContext) {
 				const video = stats.mimeType.includes('video') ? await getVideoDetails(fsPath) : "";
 
 				const pathDetails = clean([
-					["Name", stats.isFile ? stats.baseName : stats.fileName],
-					["Extension", stats.extension, stats.isFile],
+					["Name", stats.name, stats.name],
+					["Extension", stats.extension, stats.isFile && stats.extension],
 					['Mime Type', stats.mimeType, stats.isFile],
 					["Size", convertBytes(stats.size), stats.size],
 					["Contains", `${stats.contains?.files} Files, ${stats.contains?.folders} Folders`, !stats.isFile && stats.contains]
@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 					]) : "";
 
 				const locationDetails = clean([
-					['Root', stats.workspace?.fsPath, Settings.paths.relativeToRoot && Settings.paths.root && stats.workspace && stats.workspace?.fsPath],
+					['Workspace', stats.workspace?.fsPath, Settings.paths.relativeToRoot && Settings.paths.workspace && stats.workspace?.fsPath],
 					['Directory', stats.directory, Settings.paths.directory && stats.directory],
 					['Location', stats.location, Settings.paths.location && stats.location],
 				]).join('\n');

@@ -22,7 +22,7 @@ export const convertBytes = (bytes: number): string => {
 };
 
 export const clean = (list: any[]) => {
-  return list.filter(([_key, _val, show = true]) => show)
+  return list.filter(([_key, _val, show]) => show)
     .map(([key, val]) => `${key}: ${val}`);
 };
 
@@ -46,75 +46,78 @@ const getDeepStats = async (fsPath: string): Promise<fs.Stats[]> => {
   return fsStatsList.flat(Infinity).filter(Boolean) as fs.Stats[];
 };
 
+const getSizeAndContains = async (fsPath: string) => {
+  const stats = await fsProm.stat(fsPath);
+
+  if (stats.isFile()) return { size: stats.size, contains: undefined };
+
+  // If Directory then get folder size and contains
+  const allStats = await getDeepStats(fsPath);
+
+  const contains = {
+    files: allStats.filter(stat => stat.isFile()).length,
+    folders: allStats.filter(stat => stat.isDirectory()).length,
+  };
+
+  const folderSize = allStats.filter(stat => stat.isFile).reduce((res, stat) => res + stat.size, 0);
+  return { size: folderSize, contains };
+};
+
+const getWorkspaceDetails = (fsPath: string) => {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders?.length) return;
+
+  // get the nearest workspace folder
+  const workspace = workspaceFolders
+    .filter(wsf => fsPath.includes(wsf.uri.fsPath))
+    .sort((a, b) => b.uri.fsPath.length - a.uri.fsPath.length)[0];
+
+  if (!workspace) return;
+
+  const selectedPath = fsPath.replace(/\\/g, "/");
+  const workspacePath = workspace.uri.fsPath.replace(/\\/g, "/");
+
+  if (workspacePath === selectedPath) return;
+
+  return {
+    name: workspace.name,
+    fsPath: workspacePath
+  };
+};
+
+const getPathDetails = (fsPath: string) => {
+  const workspace = getWorkspaceDetails(fsPath);
+  const location = fsPath.replace(/\\/g, "/");
+  const directory = path.dirname(fsPath).replace(/\\/g, "/");
+
+  if (!workspace || !Settings.paths.relativeToRoot) return { workspace, directory, location };
+
+  // Get relative path to workspace
+  const relativeDirectory = directory !== workspace.fsPath ? "./" + path.relative(workspace.fsPath, directory).replace(/\\/g, "/") : undefined;
+  const relativeLocation = "./" + path.relative(workspace.fsPath, location).replace(/\\/g, "/");
+
+  return { workspace, directory: relativeDirectory, location: relativeLocation };
+};
+
 export const getStats = async (fsPath: string) => {
   const stats = await fsProm.stat(fsPath);
-  const extension = path.extname(fsPath) || "[none]";
+  const extension = path.extname(fsPath);
   const fileName = path.basename(fsPath);
   const baseName = path.basename(fsPath, extension);
   const isFile = stats.isFile();
+  const name = isFile ? baseName : fileName;
   const type = isFile ? "File" : "Folder";
   const mimeType = mime.getType(fsPath) || '[unknown]';
   const created = stats.birthtime;
   const changed = stats.ctime;
   const modified = stats.mtime;
   const accessed = stats.atime;
-
-  let location = fsPath.replace(/\\/g, "/");
-  let directory = path.dirname(fsPath).replace(/\\/g, "/");
-
-  let size = stats.size;
-  let contains;
-  let workspace;
-
-  const workSpaceFolders = vscode.workspace.workspaceFolders;
-  if (workSpaceFolders?.length) {
-
-    // get the nearest workspace folder
-    const currentWorkSpace = workSpaceFolders
-      .filter(wsf => fsPath.includes(wsf.uri.fsPath))
-      .sort((a, b) => b.uri.fsPath.length - a.uri.fsPath.length)[0];
-
-    workspace = currentWorkSpace ? {
-      name: currentWorkSpace.name,
-      fsPath: currentWorkSpace.uri.fsPath.replace(/\\/g, "/")
-    } : undefined;
-  }
-
-
-  if (stats.isDirectory()) {
-    const allStats = await getDeepStats(fsPath);
-
-    contains = {
-      files: allStats.filter(stat => stat.isFile()).length,
-      folders: allStats.filter(stat => stat.isDirectory()).length,
-    };
-
-    const folderSize = allStats.filter(stat => stat.isFile).reduce((res, stat) => res + stat.size, 0);
-    size = folderSize;
-  }
-
-  // Set relative path to workspace
-  if (Settings.paths.relativeToRoot && workspace) {
-    directory = "./" + path.relative(workspace.fsPath, directory).replace(/\\/g, "/");
-    location = "./" + path.relative(workspace.fsPath, location).replace(/\\/g, "/");
-  }
+  const { size, contains } = await getSizeAndContains(fsPath);
+  const { workspace, directory, location } = getPathDetails(fsPath);
 
   return {
-    extension,
-    fileName,
-    directory,
-    location,
-    baseName,
-    type,
-    mimeType,
-    isFile,
-    created,
-    changed,
-    modified,
-    accessed,
-    size,
-    contains,
-    workspace
+    name, extension, fileName, directory, location, baseName, type, mimeType,
+    isFile, created, changed, modified, accessed, size, contains, workspace
   };
 };
 

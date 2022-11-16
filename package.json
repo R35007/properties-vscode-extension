@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "7.0.1",
+	"version": "7.0.2",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -91,13 +91,13 @@
 					"order": 2,
 					"type": "object",
 					"default": {
-						"root": true,
+						"workspace": true,
 						"directory": true,
 						"location": true,
 						"relativeToRoot": false
 					},
 					"properties": {
-						"root": {
+						"workspace": {
 							"type": "boolean",
 							"default": true,
 							"description": "Show workspace folder path. It shows only when properties.settings.relativeToWorkspace is set to true"

@@ -24,10 +24,6 @@ Get file or Folder Properties.
     <img src="./images/file-properties.png" alt="Screenshot" width="500">
   </div>
   <div>
-    <h2>Selection Properties</h2>
-    <img src="./images/file-properties-with-selection.png" alt="Screenshot" width="500">
-  </div>
-  <div>
     <h2>Image Properties</h2>
     <img src="./images/image-properties.png" alt="Screenshot" width="500">
   </div>

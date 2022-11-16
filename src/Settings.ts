@@ -49,7 +49,7 @@ export class Settings {
   }
   static get paths() {
     return Settings.getSettings("paths") as {
-      "root": boolean,
+      "workspace": boolean,
       "directory": boolean,
       "location": boolean,
       "relativeToRoot": boolean
