@@ -33,6 +33,20 @@ export class Settings {
       "year": boolean
     };
   }
+  static get imageMetaData() {
+    return Settings.getSettings("imageMetaData") as {
+      "dimensions": boolean,
+      "width": boolean,
+      "height": boolean
+    };
+  }
+  static get selections() {
+    return Settings.getSettings("selections") as {
+      "lines": boolean,
+      "words": boolean,
+      "data": boolean
+    };
+  }
   static get paths() {
     return Settings.getSettings("paths") as {
       "root": boolean,
@@ -43,5 +57,8 @@ export class Settings {
   }
   static get showDuration() {
     return Settings.getSettings("showDuration") as boolean;
+  }
+  static get copyAction() {
+    return Settings.getSettings("copyAction") as "Properties" | "Location";
   }
 }

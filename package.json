@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "6.0.0",
+	"version": "7.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -18,26 +18,27 @@
 		"vscode": "^1.73.0"
 	},
 	"keywords": [
-		"File",
-		"Folder",
 		"Properties",
 		"File properties",
 		"Folder properties",
-		"Image",
 		"Image properties",
 		"Audio properties",
 		"Video properties",
-		"durations",
 		"Audio durations",
 		"Video durations",
-		"Dimensions",
 		"Image dimensions",
 		"mime type",
-		"mime",
 		"folder size",
 		"file size",
-		"size",
-		"timestamp"
+		"timestamp",
+		"selection details",
+		"lines",
+		"words",
+		"object size",
+		"array length",
+		"nodes count",
+		"stats",
+		"statistics"
 	],
 	"categories": [
 		"Other"
@@ -58,13 +59,36 @@
 			"type": "object",
 			"title": "Properties Configuration",
 			"properties": {
-				"properties.settings.dateTimeFormat": {
+				"properties.settings.selections": {
 					"order": 1,
-					"type": "string",
-					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+					"type": "object",
+					"default": {
+						"lines": true,
+						"words": true,
+						"data": true
+					},
+					"properties": {
+						"lines": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show lines count."
+						},
+						"words": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show words count."
+						},
+						"data": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show array length, object size, nodes length based on selection."
+						}
+					},
+					"description": "Show selection details",
+					"additionalProperties": false
 				},
 				"properties.settings.paths": {
-					"order": 8,
+					"order": 2,
 					"type": "object",
 					"default": {
 						"root": true,
@@ -94,17 +118,39 @@
 							"description": "Show Directory and Location relative to workspace folder."
 						}
 					},
-					"description": "Add Default middlewares.",
+					"description": "Show file or folder path details.",
 					"additionalProperties": false
 				},
-				"properties.settings.showDuration": {
-					"order": 2,
-					"type": "boolean",
-					"default": true,
-					"description": "Show audio / video duration. May take few seconds to get duration."
+				"properties.settings.imageMetaData": {
+					"order": 3,
+					"type": "object",
+					"default": {
+						"dimensions": true,
+						"width": true,
+						"height": true
+					},
+					"properties": {
+						"dimensions": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show image dimensions(width x height)."
+						},
+						"width": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show image width."
+						},
+						"height": {
+							"type": "boolean",
+							"default": true,
+							"description": "Show image height."
+						}
+					},
+					"description": "Show image details",
+					"additionalProperties": false
 				},
 				"properties.settings.audioMetaData": {
-					"order": 8,
+					"order": 4,
 					"type": "object",
 					"default": {
 						"title": true,
@@ -145,11 +191,17 @@
 							"description": "Show audio duration."
 						}
 					},
-					"description": "Add Default middlewares.",
+					"description": "Show audio details.",
 					"additionalProperties": false
 				},
+				"properties.settings.showDuration": {
+					"order": 5,
+					"type": "boolean",
+					"default": true,
+					"description": "Show audio / video duration. May take few seconds to get duration."
+				},
 				"properties.settings.timeStamps": {
-					"order": 8,
+					"order": 6,
 					"type": "object",
 					"default": {
 						"createdTimestamp": true,
@@ -185,8 +237,27 @@
 							"description": "Show relative timestamp."
 						}
 					},
-					"description": "Add Default middlewares.",
+					"description": "Show timestamp details.",
 					"additionalProperties": false
+				},
+				"properties.settings.dateTimeFormat": {
+					"order": 7,
+					"type": "string",
+					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+				},
+				"properties.settings.copyAction": {
+					"order": 8,
+					"type": "string",
+					"default": "Properties",
+					"enum": [
+						"Properties",
+						"Location"
+					],
+					"enumDescriptions": [
+						"Copy full Properties",
+						"Copy Location"
+					],
+					"markdownDescription": "On click of copy button determine what action to perform"
 				}
 			}
 		},
@@ -242,10 +313,12 @@
 	},
 	"dependencies": {
 		"dateformat": "^4.6.3",
+		"durable-json-lint": "^0.0.3",
 		"get-folder-size": "^4.0.0",
 		"get-video-duration": "^4.1.0",
 		"humanize-duration": "^3.27.3",
 		"image-size": "^1.0.2",
+		"jsdom": "^20.0.2",
 		"mime": "^3.0.0",
 		"moment": "^2.29.4",
 		"musicmetadata": "^2.0.5",

@@ -3,10 +3,12 @@ import * as fs from "fs";
 import * as fsProm from "fs/promises";
 import { getVideoDurationInSeconds } from 'get-video-duration';
 import imageSize from "image-size";
+import * as mime from "mime";
 import * as moment from "moment";
 import * as musicmetadata from 'musicmetadata';
 import * as path from "path";
 import * as vscode from 'vscode';
+import * as DataDetails from './DataDetails';
 import { Settings } from './Settings';
 
 
@@ -19,10 +21,9 @@ export const convertBytes = (bytes: number): string => {
   return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + ` (${bytes} bytes)`;
 };
 
-export const toString = (list: any[]) => {
-  return list.filter(([key, val, show = true]) => val && show)
-    .map(([key, val]) => `${key} : ${val}`)
-    .join("\n");
+export const clean = (list: any[]) => {
+  return list.filter(([_key, _val, show = true]) => show)
+    .map(([key, val]) => `${key}: ${val}`);
 };
 
 const getDeepStats = async (fsPath: string): Promise<fs.Stats[]> => {
@@ -52,6 +53,7 @@ export const getStats = async (fsPath: string) => {
   const baseName = path.basename(fsPath, extension);
   const isFile = stats.isFile();
   const type = isFile ? "File" : "Folder";
+  const mimeType = mime.getType(fsPath) || '[unknown]';
   const created = stats.birthtime;
   const changed = stats.ctime;
   const modified = stats.mtime;
@@ -72,10 +74,10 @@ export const getStats = async (fsPath: string) => {
       .filter(wsf => fsPath.includes(wsf.uri.fsPath))
       .sort((a, b) => b.uri.fsPath.length - a.uri.fsPath.length)[0];
 
-    workspace = {
+    workspace = currentWorkSpace ? {
       name: currentWorkSpace.name,
       fsPath: currentWorkSpace.uri.fsPath.replace(/\\/g, "/")
-    };
+    } : undefined;
   }
 
 
@@ -104,6 +106,7 @@ export const getStats = async (fsPath: string) => {
     location,
     baseName,
     type,
+    mimeType,
     isFile,
     created,
     changed,
@@ -134,7 +137,6 @@ export const getImageDetails = (imagePath: string) => {
   }
 };
 
-
 export const getAudioDetails = async (audioPath: string): Promise<MM.Metadata | undefined> => {
   try {
     var readableStream = fs.createReadStream(audioPath);
@@ -163,4 +165,67 @@ export const getVideoDetails = async (videoPath: string) => {
     console.error(error.message);
     return undefined;
   }
+};
+
+// Function to return all selected Texts and other editor details
+const getEditorProps = (fsPath: string) => {
+  const editor = vscode.window.activeTextEditor;
+  const document = editor?.document;
+  const selections = [...(editor?.selections || [])];
+  const filePath = document?.uri?.fsPath;
+  const selectedText = selections?.map((s) => document?.getText(s)).join(' ').trim();
+  return { editor, filePath, selections, selectedText };
+};
+
+// Returns number of selected lines
+const getLinesCount = (selections: vscode.Selection[]): number => {
+  let lines = 0;
+  if (selections.every((s) => s.isEmpty)) return 0; // returns If there is no selection
+
+  const selectedLines: number[] = [];
+
+  lines = selections.reduce((prev, curr) => {
+    const startLine = curr.start.line;
+    const endLine = curr.end.line;
+    let lineIncrement = 0;
+
+    // This is to avoid counting already selected line by a multi cursor selection
+    if (!selectedLines.includes(startLine)) {
+      lineIncrement = 1;
+      selectedLines.push(startLine);
+    }
+    return prev + (endLine - startLine) + lineIncrement;
+  }, 0);
+  return lines;
+};
+
+// Returns number of selected words
+const getWordsCount = (selectedText: string = ''): number => {
+  if (!selectedText?.trim()) return 0;
+  selectedText = selectedText.replace(/(^\s*)|(\s*$)/gi, ''); // removes leading and trailing spaces including enter spaces
+  selectedText = selectedText.replace(/[^a-zA-Z ]/g, ' '); // replace all non characters symbols by a single space. ex: data-size-count -> data size count
+  selectedText = selectedText.replace(/[ ]{2,}/gi, ' '); // replace more than 2 or more spaces with a single space.
+  selectedText = selectedText.replace(/\n /, '\n'); // replace enter space character with next line
+
+  let selectedTextChunk = selectedText.split(' '); // split by single space
+  selectedTextChunk = selectedTextChunk.map((s: string) => (s ? s.trim() : s)); // trim each word
+  selectedTextChunk = selectedTextChunk.filter(String).filter((s: string) => s && s.length >= 2); // filter text which are only string and has minimum 3 characters
+
+  const wordsCount = selectedTextChunk.length;
+  return wordsCount;
+};
+
+export const getSelectionDetails = (fsPath: string) => {
+  const { editor, filePath, selections, selectedText } = getEditorProps(fsPath);
+  if (!editor
+    || filePath !== fsPath
+    || !selections.length
+    || !selectedText?.length
+  ) return;
+
+  const lines = getLinesCount(selections);
+  const words = getWordsCount(selectedText);
+  const data = DataDetails.getDetails(selectedText);
+
+  return { lines, words, data };
 };
