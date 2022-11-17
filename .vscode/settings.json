@@ -10,6 +10,8 @@
     "typescript.tsc.autoDetect": "off",
     "cSpell.words": [
         "Ffprobe",
+        "kbps",
+        "mbps",
         "musicmetadata",
         "videometadata"
     ]

@@ -1,7 +1,8 @@
-import * as vscode from 'vscode';
-import { Settings } from './Settings';
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as humanizeDuration from "humanize-duration";
-import { convertBytes, formatDate, getAudioDetails, getImageDetails, getSelectionDetails, getStats, getVideoDetails, clean } from './helpers';
+import * as vscode from 'vscode';
+import { cleanEntries, convertBytes, formatDate, getAudioDetails, getImageDetails, getSelectionDetails, getStats, getVideoDetails } from './helpers';
+import { Settings } from './Settings';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -14,85 +15,79 @@ export function activate(context: vscode.ExtensionContext) {
 			await vscode.window.withProgress({
 				location: vscode.ProgressLocation.Notification,
 				title: "Please wait...",
-			}, async () => {
+				cancellable: true
+			}, async (_progress, token) => {
 
 				const stats = await getStats(fsPath);
-
 				const selection = getSelectionDetails(fsPath);
-
 				const image = stats.mimeType.includes('image') ? getImageDetails(fsPath) : "";
-
 				const audio = stats.mimeType.includes('audio') ? await getAudioDetails(fsPath) : "";
-
 				const video = stats.mimeType.includes('video') ? await getVideoDetails(fsPath) : "";
 
-				const pathDetails = clean([
-					["Name", stats.name, stats.name],
-					["Extension", stats.extension, stats.isFile && stats.extension],
-					['Mime Type', stats.mimeType, stats.isFile],
-					["Size", convertBytes(stats.size), stats.size],
-					["Contains", `${stats.contains?.files} Files, ${stats.contains?.folders} Folders`, !stats.isFile && stats.contains]
-				]).join('\n');
+				const pathDetails = cleanEntries({
+					"Name": stats.name,
+					"Extension": stats.isFile && stats.extension,
+					"Mime Type": stats.isFile && stats.mimeType,
+					"Size": convertBytes(stats.size),
+					"Contains": !stats.isFile && stats.contains && `${stats.contains?.files} Files, ${stats.contains?.folders} Folders`,
+				}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
-				const selectionDetails = selection ?
-					clean([
-						["Lines", selection.lines, Settings.selections.lines && selection.lines],
-						["Words", selection.words, Settings.selections.words && selection.words],
-						["Array Length", selection.data.arrayLength, Settings.selections.data && typeof selection.data.arrayLength !== 'undefined'],
-						["Object Size", selection.data.objectSize, Settings.selections.data && typeof selection.data.objectSize !== 'undefined'],
-						["Nodes", selection.data.nodes, Settings.selections.data && typeof selection.data.nodes !== 'undefined'],
-						["Child Nodes", selection.data.childNodes, Settings.selections.data && typeof selection.data.childNodes !== 'undefined'],
-					]).join(", ") : "";
+				const selectionDetails = cleanEntries(selection ? {
+					"Lines": Settings.selections.lines && selection.lines,
+					"Words": Settings.selections.words && selection.words,
+					"Array Length": Settings.selections.data && selection.data.arrayLength,
+					"Object Size": Settings.selections.data && selection.data.objectSize,
+					"Nodes": Settings.selections.data && selection.data.nodes,
+					"Child Nodes": Settings.selections.data && selection.data.childNodes,
+				} : {}).map(([key, val]) => `${key} : ${val}`).join(", ");
 
-				const imageDetails = image ?
-					clean([
-						["Dimensions", `${image?.width} x ${image?.height} pixels`, Settings.metaData.dimensions && typeof image.width !== 'undefined' && typeof image.height !== 'undefined'],
-						["Width", `${image?.width} pixels`, Settings.metaData.width && typeof image.width !== 'undefined'],
-						["Height", `${image?.height} pixels`, Settings.metaData.height && typeof image.height !== 'undefined'],
-					]).join('\n') : "";
+				const imageDetails = cleanEntries(image ? {
+					"Dimensions": Settings.metaData.dimensions && typeof image.width !== 'undefined' && typeof image.height !== 'undefined' && `${image?.width} x ${image?.height} pixels`,
+					"Width": Settings.metaData.width && typeof image.width !== 'undefined' && `${image?.width} pixels`,
+					"Height": Settings.metaData.height && typeof image.height !== 'undefined' && `${image?.height} pixels`,
+				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
-				const audioDetails = audio ?
-					clean([
-						["Title", audio.title, Settings.metaData.title && audio.title],
-						["Album", audio.album, Settings.metaData.album && audio.album],
-						["Artist", audio.artist, Settings.metaData.artist && audio.artist],
-						["Composer", audio.composer, Settings.metaData.composer && audio.composer],
-						["Genre", audio.genre, Settings.metaData.genre && audio.genre],
-						["Bit Rate", convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false), Settings.metaData.bitRate && audio.bitRate],
-						["Channels", audio.channels, Settings.metaData.channels && audio.channels],
-						["Year", audio.year, Settings.metaData.year && audio.year],
-						["Duration", humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }), Settings.metaData.duration && audio.duration],
-					]).join('\n') : "";
+				const audioDetails = cleanEntries(audio ? {
+					"Title": Settings.metaData.title && audio.title,
+					"Album": Settings.metaData.album && audio.album,
+					"Artist": Settings.metaData.artist && audio.artist,
+					"Composer": Settings.metaData.composer && audio.composer,
+					"Genre": Settings.metaData.genre && audio.genre,
+					"Bit Rate": Settings.metaData.bitRate && audio.bitRate && convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false),
+					"Channels": Settings.metaData.channels && audio.channels,
+					"Year": Settings.metaData.year && audio.year,
+					"Duration": Settings.metaData.duration && typeof audio.duration !== 'undefined' && humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }),
+				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
-				const videoDetails = video ?
-					clean([
-						["Dimensions", `${video?.width} x ${video?.height} pixels`,  Settings.metaData.dimensions && typeof video.width !== 'undefined' && typeof video.height !== 'undefined'],
-						["Width", `${video?.width} pixels`,  Settings.metaData.width && typeof video.width !== 'undefined'],
-						["Height", `${video?.height} pixels`,  Settings.metaData.height && typeof video.height !== 'undefined'],
-						["Frame Rate", `${video.frameRate}fps`,  Settings.metaData.frameRate && video.frameRate],
-						["Bit Rate", convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),  Settings.metaData.bitRate && video.bitRate],
-						["Ratio", video.ratio,  Settings.metaData.ratio && video.ratio],
-						["Duration", humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }), Settings.metaData.duration && video.duration],
-					]).join('\n') : "";
+				const videoDetails = cleanEntries(video ? {
+					"Dimensions": Settings.metaData.dimensions && typeof video.width !== 'undefined' && typeof video.height !== 'undefined' && `${video?.width} x ${video?.height} pixels`,
+					"Width": Settings.metaData.width && typeof video.width !== 'undefined' && `${video?.width} pixels`,
+					"Height": Settings.metaData.height && typeof video.height !== 'undefined' && `${video?.height} pixels`,
+					"Frame Rate": Settings.metaData.frameRate && video.frameRate && `${video.frameRate}fps`,
+					"Bit Rate": Settings.metaData.bitRate && video.bitRate && convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),
+					"Ratio": Settings.metaData.ratio && video.ratio,
+					"Duration": Settings.metaData.duration && typeof video.duration !== 'undefined' && humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }),
+				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
-				const locationDetails = clean([
-					['Workspace', stats.workspace?.fsPath, Settings.paths.relativeToRoot && Settings.paths.workspace && stats.workspace?.fsPath],
-					['Directory', stats.directory, Settings.paths.directory && stats.directory],
-					['Location', stats.location, Settings.paths.location && stats.location],
-				]).join('\n');
+				const locationDetails = cleanEntries({
+					"Workspace": Settings.paths.relativeToRoot && stats.workspace?.fsPath,
+					"Directory": Settings.paths.directory && stats.directory,
+					"Location": Settings.paths.location && stats.location,
+				}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
-				const timestampDetails = clean([
-					['Created', formatDate(stats.created), Settings.timeStamps.createdTimestamp && stats.created],
-					['Changed', formatDate(stats.changed), Settings.timeStamps.changedTimestamp && stats.changed],
-					['Modified', formatDate(stats.modified), Settings.timeStamps.modifiedTimestamp && stats.modified],
-					['Accessed', formatDate(stats.accessed), Settings.timeStamps.accessedTimestamp && stats.accessed]
-				]).join('\n');
+				const timestampDetails = cleanEntries({
+					"Created": Settings.timeStamps.createdTimestamp && stats.created && formatDate(stats.created),
+					"Changed": Settings.timeStamps.changedTimestamp && stats.changed && formatDate(stats.changed),
+					"Modified": Settings.timeStamps.modifiedTimestamp && stats.modified && formatDate(stats.modified),
+					"Accessed": Settings.timeStamps.accessedTimestamp && stats.accessed && formatDate(stats.accessed),
+				}).map(([key, val]) => `${key} : ${val}`).join("\n");
+
 
 				const result = [pathDetails, selectionDetails, imageDetails, audioDetails, videoDetails, locationDetails, timestampDetails]
 					.filter(Boolean)
 					.join('\n----------------------------------------------------------------------\n');
 
-				vscode.window.showInformationMessage(stats.fileName, { modal: true, detail: result }, `Copy ${Settings.copyAction}`)
+				!token.isCancellationRequested && vscode.window.showInformationMessage(stats.fileName, { modal: true, detail: result }, `Copy ${Settings.copyAction}`)
 					.then(action => {
 						if (action) {
 							const copyText = Settings.copyAction === "Properties" ? `${stats.fileName}\n\n${result}` : stats.location;

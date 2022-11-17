@@ -1,31 +1,33 @@
 import * as dateformat from "dateformat";
+import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from "fs";
 import * as fsProm from "fs/promises";
-import { getVideoDurationInSeconds } from 'get-video-duration';
 import imageSize from "image-size";
 import * as mime from "mime";
 import * as moment from "moment";
-import * as musicmetadata from 'musicmetadata';
 import * as path from "path";
 import * as vscode from 'vscode';
 import * as DataDetails from './DataDetails';
 import { Settings } from './Settings';
-import * as  ffmpeg from 'fluent-ffmpeg';
 const ffprobe = require('@ffprobe-installer/ffprobe');
-
 ffmpeg.setFfprobePath(ffprobe.path);
 
 // Converts the file size from Bytes to KB | MB | GB | TB
 export const convertBytes = (bytes: number, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'], showBytes = true): string => {
-  if (bytes === 0) return 'n/a';
+  if (bytes === 0) return '0 bytes';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   if (i === 0) return bytes + ' ' + sizes[i];
   return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + (showBytes ? ` (${bytes} bytes)` : "");
 };
 
-export const clean = (list: any[]) => {
-  return list.filter(([_key, _val, show]) => show)
-    .map(([key, val]) => `${key}: ${val}`);
+export const cleanEntries = (object: Object) => {
+  return Object.entries(object)
+    .filter(([_key, val]) =>
+      typeof val !== 'undefined'
+      && val !== false
+      && `${val}`.length !== 0
+      && `${val}` !== 'undefined'
+    );
 };
 
 const getDeepStats = async (fsPath: string): Promise<fs.Stats[]> => {
@@ -166,10 +168,9 @@ export const getAudioDetails = async (audioPath: string) => {
       year: tags.date,
       duration: metaData.format.duration || 0,
       bitRate: metaData.format.bit_rate || 0,
-      channels: audio.channel_layout ? `${audio.channels} (${audio.channel_layout})` : audio.channels,
+      channels: typeof audio.channels !== 'undefined' ? audio.channel_layout ? `${audio.channels} (${audio.channel_layout})` : audio.channels : "",
     };
   } catch (error: any) {
-    console.error(error.message);
     return undefined;
   }
 };
@@ -188,7 +189,6 @@ export const getVideoDetails = async (videoPath: string) => {
       ratio: video.display_aspect_ratio
     };
   } catch (error: any) {
-    console.error(error.message);
     return undefined;
   }
 };

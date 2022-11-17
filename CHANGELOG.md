@@ -1,5 +1,13 @@
 # Change Log
 
+## [v9.0.0]
+
+- Added cancel button for a long running script.
+
+## [v8.0.0]
+
+- Added more audio and video properties
+
 ## [v7.0.0]
 
 - Fix - Properties not showing for files that are opened outer workspace folder issue fixed
