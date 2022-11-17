@@ -24,20 +24,22 @@ export class Settings {
       "relativeTimestamp": boolean
     };
   }
-  static get audioMetaData() {
-    return Settings.getSettings("audioMetaData") as {
-      "title": boolean,
-      "album": boolean,
-      "artist": boolean,
-      "genre": boolean,
-      "year": boolean
-    };
-  }
-  static get imageMetaData() {
-    return Settings.getSettings("imageMetaData") as {
+  static get metaData() {
+    return Settings.getSettings("metaData") as {
       "dimensions": boolean,
       "width": boolean,
-      "height": boolean
+      "height": boolean,
+      "title" : boolean,
+      "album" : boolean,
+      "artist" : boolean,
+      "composer" : boolean,
+      "genre" : boolean,
+      "bitRate" : boolean,
+      "frameRate" : boolean,
+      "ratio" : boolean,
+      "channels" : boolean,
+      "year" : boolean,
+      "duration" : boolean
     };
   }
   static get selections() {
@@ -54,9 +56,6 @@ export class Settings {
       "location": boolean,
       "relativeToRoot": boolean
     };
-  }
-  static get showDuration() {
-    return Settings.getSettings("showDuration") as boolean;
   }
   static get copyAction() {
     return Settings.getSettings("copyAction") as "Properties" | "Location";

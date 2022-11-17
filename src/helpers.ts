@@ -10,15 +10,17 @@ import * as path from "path";
 import * as vscode from 'vscode';
 import * as DataDetails from './DataDetails';
 import { Settings } from './Settings';
+import * as  ffmpeg from 'fluent-ffmpeg';
+const ffprobe = require('@ffprobe-installer/ffprobe');
 
+ffmpeg.setFfprobePath(ffprobe.path);
 
 // Converts the file size from Bytes to KB | MB | GB | TB
-export const convertBytes = (bytes: number): string => {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+export const convertBytes = (bytes: number, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'], showBytes = true): string => {
   if (bytes === 0) return 'n/a';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   if (i === 0) return bytes + ' ' + sizes[i];
-  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + ` (${bytes} bytes)`;
+  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + (showBytes ? ` (${bytes} bytes)` : "");
 };
 
 export const clean = (list: any[]) => {
@@ -140,17 +142,32 @@ export const getImageDetails = (imagePath: string) => {
   }
 };
 
-export const getAudioDetails = async (audioPath: string): Promise<MM.Metadata | undefined> => {
+const ffprobePromise = async (filePath: string) => {
+  const metaData: ffmpeg.FfprobeData = await new Promise((resolve, reject) =>
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) reject(err);
+      else resolve(metadata);
+    })
+  );
+  return metaData;
+};
+
+export const getAudioDetails = async (audioPath: string) => {
   try {
-    var readableStream = fs.createReadStream(audioPath);
-    const result = await new Promise((resolve, reject) => {
-      musicmetadata(readableStream, { duration: Settings.showDuration }, function (err, metadata) {
-        if (err) throw reject(err);
-        readableStream.close();
-        resolve(metadata);
-      });
-    });
-    return result as MM.Metadata;
+    const metaData = await ffprobePromise(audioPath);
+    const audio = metaData.streams.find(st => st.codec_type === 'audio') || {} as ffmpeg.FfprobeStream;
+    const tags = metaData.format.tags || {};
+    return {
+      title: tags.title,
+      album: tags.album,
+      artist: tags.artist,
+      composer: tags.composer,
+      genre: tags.genre,
+      year: tags.date,
+      duration: metaData.format.duration || 0,
+      bitRate: metaData.format.bit_rate || 0,
+      channels: audio.channel_layout ? `${audio.channels} (${audio.channel_layout})` : audio.channels,
+    };
   } catch (error: any) {
     console.error(error.message);
     return undefined;
@@ -160,10 +177,16 @@ export const getAudioDetails = async (audioPath: string): Promise<MM.Metadata | 
 // TODO: Now we get only duration. We need try to get other video information as well
 export const getVideoDetails = async (videoPath: string) => {
   try {
-    if (!Settings.showDuration) return;
-    var readableStream = fs.createReadStream(videoPath);
-    const duration = await getVideoDurationInSeconds(readableStream);
-    return { duration };
+    const metaData = await ffprobePromise(videoPath);
+    const video = metaData.streams.find(st => st.codec_type === 'video') || {} as ffmpeg.FfprobeStream;
+    return {
+      width: video.width,
+      height: video.height,
+      duration: metaData.format.duration || 0,
+      bitRate: parseInt(video.bit_rate || '0', 10),
+      frameRate: eval(video.r_frame_rate || "0").toFixed(2),
+      ratio: video.display_aspect_ratio
+    };
   } catch (error: any) {
     console.error(error.message);
     return undefined;

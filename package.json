@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "7.0.2",
+	"version": "8.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -121,84 +121,43 @@
 					"description": "Show file or folder path details.",
 					"additionalProperties": false
 				},
-				"properties.settings.imageMetaData": {
+				"properties.settings.metaData": {
 					"order": 3,
 					"type": "object",
 					"default": {
 						"dimensions": true,
 						"width": true,
-						"height": true
+						"height": true,
+						"title" : true,
+						"album" : true,
+						"artist" : true,
+						"composer" : true,
+						"genre" : true,
+						"bitRate" : true,
+						"frameRate" : true,
+						"ratio" : true,
+						"channels" : true,
+						"year" : true,
+						"duration" : true
 					},
 					"properties": {
-						"dimensions": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show image dimensions(width x height)."
-						},
-						"width": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show image width."
-						},
-						"height": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show image height."
-						}
+						"dimensions": { "type": "boolean", "title": "dimensions" },
+						"width": { "type": "boolean", "title": "width" },
+						"height": { "type": "boolean", "title": "height" },
+						"title": { "type": "boolean", "title": "title" },
+						"album": { "type": "boolean", "title": "album" },
+						"artist": { "type": "boolean", "title": "artist" },
+						"composer": { "type": "boolean", "title": "composer" },
+						"genre": { "type": "boolean", "title": "genre" },
+						"bitRate": { "type": "boolean", "title": "bitRate" },
+						"frameRate": { "type": "boolean", "title": "bitRate" },
+						"ratio": { "type": "boolean", "title": "bitRate" },
+						"channels": { "type": "boolean", "title": "channels" },
+						"year": { "type": "boolean", "title": "year" },
+						"duration": { "type": "boolean", "title": "duration" }
 					},
-					"description": "Show image details",
+					"description": "Properties of audio, image, video to show.",
 					"additionalProperties": false
-				},
-				"properties.settings.audioMetaData": {
-					"order": 4,
-					"type": "object",
-					"default": {
-						"title": true,
-						"album": true,
-						"artist": true,
-						"genre": true,
-						"year": true
-					},
-					"properties": {
-						"title": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio title."
-						},
-						"album": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio album."
-						},
-						"artist": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio artist."
-						},
-						"genre": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio genre."
-						},
-						"year": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio year."
-						},
-						"duration": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show audio duration."
-						}
-					},
-					"description": "Show audio details.",
-					"additionalProperties": false
-				},
-				"properties.settings.showDuration": {
-					"order": 5,
-					"type": "boolean",
-					"default": true,
-					"description": "Show audio / video duration. May take few seconds to get duration."
 				},
 				"properties.settings.timeStamps": {
 					"order": 6,
@@ -298,12 +257,11 @@
 	},
 	"devDependencies": {
 		"@types/dateformat": "^3.0.1",
-		"@types/get-folder-size": "^3.0.1",
+		"@types/fluent-ffmpeg": "^2.1.20",
 		"@types/humanize-duration": "^3.27.1",
 		"@types/image-size": "^0.8.0",
 		"@types/mime": "^3.0.1",
 		"@types/moment": "^2.13.0",
-		"@types/musicmetadata": "^2.0.6",
 		"@types/node": "^14.18.33",
 		"@types/vscode": "^1.73.0",
 		"@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -312,16 +270,15 @@
 		"typescript": "^4.5.5"
 	},
 	"dependencies": {
+		"@ffprobe-installer/ffprobe": "^1.4.1",
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
-		"get-folder-size": "^4.0.0",
-		"get-video-duration": "^4.1.0",
+		"fluent-ffmpeg": "^2.1.2",
 		"humanize-duration": "^3.27.3",
 		"image-size": "^1.0.2",
 		"jsdom": "^20.0.2",
 		"mime": "^3.0.0",
 		"moment": "^2.29.4",
-		"musicmetadata": "^2.0.5",
 		"npm": "^9.1.1"
 	}
 }

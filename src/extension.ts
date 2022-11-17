@@ -46,25 +46,34 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const imageDetails = image ?
 					clean([
-						["Dimensions", `${image?.width} x ${image?.height} pixels`, Settings.imageMetaData.dimensions && typeof image.width !== 'undefined' && typeof image.height !== 'undefined'],
-						["Width", `${image?.width} pixels`, Settings.imageMetaData.width && typeof image.width !== 'undefined'],
-						["Height", `${image?.height} pixels`, Settings.imageMetaData.height && typeof image.height !== 'undefined'],
+						["Dimensions", `${image?.width} x ${image?.height} pixels`, Settings.metaData.dimensions && typeof image.width !== 'undefined' && typeof image.height !== 'undefined'],
+						["Width", `${image?.width} pixels`, Settings.metaData.width && typeof image.width !== 'undefined'],
+						["Height", `${image?.height} pixels`, Settings.metaData.height && typeof image.height !== 'undefined'],
 					]).join('\n') : "";
 
 				const audioDetails = audio ?
 					clean([
-						["Title", audio.title, Settings.audioMetaData.title && audio.title],
-						["Album", audio.album, Settings.audioMetaData.album && audio.album],
-						["Artist", audio.artist.join(', '), Settings.audioMetaData.artist && audio.artist],
-						["Genre", audio.genre.join(', '), Settings.audioMetaData.genre && audio.genre],
-						["Year", audio.year, Settings.audioMetaData.year && audio.year],
-						["Duration", humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }), Settings.showDuration && audio.duration],
+						["Title", audio.title, Settings.metaData.title && audio.title],
+						["Album", audio.album, Settings.metaData.album && audio.album],
+						["Artist", audio.artist, Settings.metaData.artist && audio.artist],
+						["Composer", audio.composer, Settings.metaData.composer && audio.composer],
+						["Genre", audio.genre, Settings.metaData.genre && audio.genre],
+						["Bit Rate", convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false), Settings.metaData.bitRate && audio.bitRate],
+						["Channels", audio.channels, Settings.metaData.channels && audio.channels],
+						["Year", audio.year, Settings.metaData.year && audio.year],
+						["Duration", humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }), Settings.metaData.duration && audio.duration],
 					]).join('\n') : "";
 
 				const videoDetails = video ?
 					clean([
-						["Duration", humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }), Settings.showDuration && video.duration],
-					]) : "";
+						["Dimensions", `${video?.width} x ${video?.height} pixels`,  Settings.metaData.dimensions && typeof video.width !== 'undefined' && typeof video.height !== 'undefined'],
+						["Width", `${video?.width} pixels`,  Settings.metaData.width && typeof video.width !== 'undefined'],
+						["Height", `${video?.height} pixels`,  Settings.metaData.height && typeof video.height !== 'undefined'],
+						["Frame Rate", `${video.frameRate}fps`,  Settings.metaData.frameRate && video.frameRate],
+						["Bit Rate", convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),  Settings.metaData.bitRate && video.bitRate],
+						["Ratio", video.ratio,  Settings.metaData.ratio && video.ratio],
+						["Duration", humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }), Settings.metaData.duration && video.duration],
+					]).join('\n') : "";
 
 				const locationDetails = clean([
 					['Workspace', stats.workspace?.fsPath, Settings.paths.relativeToRoot && Settings.paths.workspace && stats.workspace?.fsPath],
