@@ -12,7 +12,7 @@ Get file or Folder Properties.
 - Audio `Title`, `Album`, `Artist`, `Composer`, `Genre`, `Bit Rate`, `Channels`, `Year`, `Duration`.
 - Video `Dimensions`, `Frame Rate`, `Bit Rate`, `Ratio`, `Duration`.
 - Timestamp of `created`, `changed`, `modified`, `accessed` with relative timestamp .
-- Copy properties of location
+- Copy properties or location
 
 <div style="display: flex; flex-wrap: wrap; gap: 1rem">
   <div>
