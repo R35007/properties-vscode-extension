@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const stats = await getStats(fsPath);
 				const selection = getSelectionDetails(fsPath);
-				const image = stats.mimeType.includes('image') ? getImageDetails(fsPath) : "";
+				const image: any = stats.mimeType.includes('image') ? await getImageDetails(fsPath) : "";
 				const audio = stats.mimeType.includes('audio') ? await getAudioDetails(fsPath) : "";
 				const video = stats.mimeType.includes('video') ? await getVideoDetails(fsPath) : "";
 
@@ -33,46 +33,50 @@ export function activate(context: vscode.ExtensionContext) {
 				}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
 				const selectionDetails = cleanEntries(selection ? {
-					"Lines": Settings.selections.lines && selection.lines,
-					"Words": Settings.selections.words && selection.words,
-					"Array Length": Settings.selections.data && selection.data.arrayLength,
-					"Object Size": Settings.selections.data && selection.data.objectSize,
-					"Nodes": Settings.selections.data && selection.data.nodes,
-					"Child Nodes": Settings.selections.data && selection.data.childNodes,
+					"Lines": selection.lines,
+					"Words": selection.words,
+					"Array Length": selection.data.arrayLength,
+					"Object Size": selection.data.objectSize,
+					"Nodes": selection.data.nodes,
+					"Child Nodes": selection.data.childNodes,
 				} : {}).map(([key, val]) => `${key} : ${val}`).join(", ");
 
 				const imageDetails = cleanEntries(image ? {
-					"Dimensions": Settings.metaData.dimensions && typeof image.width !== 'undefined' && typeof image.height !== 'undefined' && `${image?.width} x ${image?.height} pixels`,
-					"Width": Settings.metaData.width && typeof image.width !== 'undefined' && `${image?.width} pixels`,
-					"Height": Settings.metaData.height && typeof image.height !== 'undefined' && `${image?.height} pixels`,
+					"Dimensions (W x H)": image.dimensions,
+					"Resolution (X x Y)": image.resolution,
+					"Orientation": image.orientation,
+					"Bit Depth": image.bitDepth,
+					"Color Type": image.colorType,
+					"Sub Sampling": image.subSampling,
+					"Compression": image.compression,
+					"Filter": image.filter,
+					"Resource URL": image.resourceURL,
 				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
 				const audioDetails = cleanEntries(audio ? {
-					"Title": Settings.metaData.title && audio.title,
-					"Album": Settings.metaData.album && audio.album,
-					"Artist": Settings.metaData.artist && audio.artist,
-					"Composer": Settings.metaData.composer && audio.composer,
-					"Genre": Settings.metaData.genre && audio.genre,
-					"Bit Rate": Settings.metaData.bitRate && audio.bitRate && convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false),
-					"Channels": Settings.metaData.channels && audio.channels,
-					"Year": Settings.metaData.year && audio.year,
-					"Duration": Settings.metaData.duration && typeof audio.duration !== 'undefined' && humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }),
+					"Title": audio.title,
+					"Album": audio.album,
+					"Artist": audio.artist,
+					"Composer": audio.composer,
+					"Genre": audio.genre,
+					"Bit Rate": audio.bitRate && convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false),
+					"Channels": audio.channels,
+					"Year": audio.year,
+					"Duration": typeof audio.duration !== 'undefined' && humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }),
 				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
 				const videoDetails = cleanEntries(video ? {
-					"Dimensions": Settings.metaData.dimensions && typeof video.width !== 'undefined' && typeof video.height !== 'undefined' && `${video?.width} x ${video?.height} pixels`,
-					"Width": Settings.metaData.width && typeof video.width !== 'undefined' && `${video?.width} pixels`,
-					"Height": Settings.metaData.height && typeof video.height !== 'undefined' && `${video?.height} pixels`,
-					"Frame Rate": Settings.metaData.frameRate && video.frameRate && `${video.frameRate}fps`,
-					"Bit Rate": Settings.metaData.bitRate && video.bitRate && convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),
-					"Ratio": Settings.metaData.ratio && video.ratio,
-					"Duration": Settings.metaData.duration && typeof video.duration !== 'undefined' && humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }),
+					"Dimensions (W x H)": video.dimensions,
+					"Frame Rate": video.frameRate && `${video.frameRate}fps`,
+					"Bit Rate": video.bitRate && convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),
+					"Ratio": video.ratio,
+					"Duration": typeof video.duration !== 'undefined' && humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }),
 				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
 				const locationDetails = cleanEntries({
-					"Workspace": Settings.paths.relativeToRoot && stats.workspace?.fsPath,
-					"Directory": Settings.paths.directory && stats.directory,
-					"Location": Settings.paths.location && stats.location,
+					"Workspace": Settings.relativeToWorkspace && stats.workspace?.fsPath,
+					"Directory": stats.directory,
+					"Location": stats.location,
 				}).map(([key, val]) => `${key} : ${val}`).join("\n");
 
 				const timestampDetails = cleanEntries({

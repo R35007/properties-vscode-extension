@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "9.0.0",
+	"version": "10.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -59,105 +59,11 @@
 			"type": "object",
 			"title": "Properties Configuration",
 			"properties": {
-				"properties.settings.selections": {
-					"order": 1,
-					"type": "object",
-					"default": {
-						"lines": true,
-						"words": true,
-						"data": true
-					},
-					"properties": {
-						"lines": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show lines count."
-						},
-						"words": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show words count."
-						},
-						"data": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show array length, object size, nodes length based on selection."
-						}
-					},
-					"description": "Show selection details",
-					"additionalProperties": false
-				},
-				"properties.settings.paths": {
+				"properties.settings.relativeToWorkspace": {
 					"order": 2,
-					"type": "object",
-					"default": {
-						"workspace": true,
-						"directory": true,
-						"location": true,
-						"relativeToRoot": false
-					},
-					"properties": {
-						"workspace": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show workspace folder path. It shows only when properties.settings.relativeToWorkspace is set to true"
-						},
-						"directory": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show directory path."
-						},
-						"location": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show file or folder location."
-						},
-						"relativeToRoot": {
-							"type": "boolean",
-							"default": false,
-							"description": "Show Directory and Location relative to workspace folder."
-						}
-					},
-					"description": "Show file or folder path details.",
-					"additionalProperties": false
-				},
-				"properties.settings.metaData": {
-					"order": 3,
-					"type": "object",
-					"default": {
-						"dimensions": true,
-						"width": true,
-						"height": true,
-						"title" : true,
-						"album" : true,
-						"artist" : true,
-						"composer" : true,
-						"genre" : true,
-						"bitRate" : true,
-						"frameRate" : true,
-						"ratio" : true,
-						"channels" : true,
-						"year" : true,
-						"duration" : true
-					},
-					"properties": {
-						"dimensions": { "type": "boolean", "title": "dimensions" },
-						"width": { "type": "boolean", "title": "width" },
-						"height": { "type": "boolean", "title": "height" },
-						"title": { "type": "boolean", "title": "title" },
-						"album": { "type": "boolean", "title": "album" },
-						"artist": { "type": "boolean", "title": "artist" },
-						"composer": { "type": "boolean", "title": "composer" },
-						"genre": { "type": "boolean", "title": "genre" },
-						"bitRate": { "type": "boolean", "title": "bitRate" },
-						"frameRate": { "type": "boolean", "title": "bitRate" },
-						"ratio": { "type": "boolean", "title": "bitRate" },
-						"channels": { "type": "boolean", "title": "channels" },
-						"year": { "type": "boolean", "title": "year" },
-						"duration": { "type": "boolean", "title": "duration" }
-					},
-					"description": "Properties of audio, image, video to show.",
-					"additionalProperties": false
+					"type": "boolean",
+					"default": false,
+					"description": "If true the Directory and Location will be relative to current workspace folder."
 				},
 				"properties.settings.timeStamps": {
 					"order": 6,
@@ -273,12 +179,12 @@
 		"@ffprobe-installer/ffprobe": "^1.4.1",
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
+		"exifreader": "^4.8.1",
 		"fluent-ffmpeg": "^2.1.2",
 		"humanize-duration": "^3.27.3",
 		"image-size": "^1.0.2",
 		"jsdom": "^20.0.2",
 		"mime": "^3.0.0",
-		"moment": "^2.29.4",
-		"npm": "^9.1.1"
+		"moment": "^2.29.4"
 	}
 }

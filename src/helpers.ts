@@ -3,12 +3,15 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from "fs";
 import * as fsProm from "fs/promises";
 import imageSize from "image-size";
+import * as ExifReader from "exifreader";
 import * as mime from "mime";
 import * as moment from "moment";
 import * as path from "path";
 import * as vscode from 'vscode';
 import * as DataDetails from './DataDetails';
 import { Settings } from './Settings';
+
+
 const ffprobe = require('@ffprobe-installer/ffprobe');
 ffmpeg.setFfprobePath(ffprobe.path);
 
@@ -94,7 +97,7 @@ const getPathDetails = (fsPath: string) => {
   const location = fsPath.replace(/\\/g, "/");
   const directory = path.dirname(fsPath).replace(/\\/g, "/");
 
-  if (!workspace || !Settings.paths.relativeToRoot) return { workspace, directory, location };
+  if (!workspace || !Settings.relativeToWorkspace) return { workspace, directory, location };
 
   // Get relative path to workspace
   const relativeDirectory = directory !== workspace.fsPath ? "./" + path.relative(workspace.fsPath, directory).replace(/\\/g, "/") : undefined;
@@ -135,12 +138,52 @@ export const formatDate = (date: Date) => {
   return `${absolute} (${relative})`;
 };
 
-export const getImageDetails = (imagePath: string) => {
+const getImageDimensions = (metaData: ExifReader.Tags & ExifReader.XmpTags & ExifReader.IccTags) => {
+  const width = metaData.ImageWidth?.value ?? metaData["Image Width"]?.value ?? metaData.PixelXDimension?.value;
+  const height = metaData.ImageLength?.value ?? metaData["Image Height"]?.value ?? metaData.PixelYDimension?.value;
+  return {
+    width,
+    height,
+    dimensions: typeof width !== "undefined" && typeof height !== "undefined" && `${width} x ${height} pixels`
+  };
+};
+
+const getImageResolution = (metaData: ExifReader.Tags & ExifReader.XmpTags & ExifReader.IccTags) => {
+  const xResolution = metaData.XResolution?.description;
+  const yResolution = metaData.YResolution?.description;
+  return {
+    xResolution,
+    yResolution,
+    resolution: typeof xResolution !== "undefined" && typeof yResolution !== "undefined" && `${xResolution} x ${yResolution} Dpi`
+  };
+};
+
+export const getImageDetails = async (imagePath: string) => {
   try {
-    const dimensions = imageSize(imagePath);
-    return dimensions;
+
+    const metaData = await ExifReader.load(imagePath);
+    return {
+      ...getImageDimensions(metaData),
+      ...getImageResolution(metaData),
+      orientation: metaData.Orientation?.description,
+      bitDepth: metaData["Bit Depth"]?.description ?? metaData.BitDepth?.description ?? metaData["Bits Per Sample"]?.description ?? metaData.BitsPerSample?.description,
+      colorType: metaData["Color Type"]?.description ?? metaData.ColorType?.description ?? metaData["Color Space"]?.description ?? metaData.ColorSpace?.description,
+      subSampling: metaData["Subsampling"]?.description ?? metaData.YCbCrSubSampling?.description,
+      compression: metaData.Compression?.description,
+      filter: metaData.Filter?.description,
+      resourceURL: metaData.ResourceURL?.description,
+    };
   } catch (err) {
-    console.log(err);
+    try {
+      const image = imageSize(imagePath);
+      return {
+        height: image.height,
+        width: image.width,
+        dimensions: typeof image.width !== "undefined" && typeof image.height !== "undefined" && `${image.width} x ${image.height} pixels`
+      };
+    } catch (err) {
+      return undefined;
+    }
   }
 };
 
@@ -175,12 +218,12 @@ export const getAudioDetails = async (audioPath: string) => {
   }
 };
 
-// TODO: Now we get only duration. We need try to get other video information as well
 export const getVideoDetails = async (videoPath: string) => {
   try {
     const metaData = await ffprobePromise(videoPath);
     const video = metaData.streams.find(st => st.codec_type === 'video') || {} as ffmpeg.FfprobeStream;
     return {
+      dimensions: typeof video.width !== "undefined" && typeof video.height !== "undefined" && `${video.width} x ${video.height} pixels`,
       width: video.width,
       height: video.height,
       duration: metaData.format.duration || 0,

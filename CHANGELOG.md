@@ -1,5 +1,10 @@
 # Change Log
 
+## [v10.0.0]
+
+- Removed Show hide settings.
+- Added more image properties.
+
 ## [v9.0.0]
 
 - Added cancel button for a long running script.

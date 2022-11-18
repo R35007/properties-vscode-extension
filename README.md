@@ -7,10 +7,10 @@ Get file or Folder Properties.
 - File `Mime Type`.
 - Number of selected `Lines`, `Words`, `Object Size`, `Array Length`, `Nodes`, `Child Nodes`.
 - Folders `Contains`.
-- Image `Dimensions`, `Width`, `Height`.
+- Image `Dimensions`, `Resolution`, `Bit Depth`, `Color Type`, `Sub Sampling`, `Compression`, `Filter`, `Resource URL`.
 - File or Folder `Workspace`, `Directory` and `Location`.
 - Audio `Title`, `Album`, `Artist`, `Composer`, `Genre`, `Bit Rate`, `Channels`, `Year`, `Duration`.
-- Video `Dimensions`, `Width`, `Height`, `Frame Rate`, `Bit Rate`, `Ratio`, `Duration`.
+- Video `Dimensions`, `Frame Rate`, `Bit Rate`, `Ratio`, `Duration`.
 - Timestamp of `created`, `changed`, `modified`, `accessed` with relative timestamp .
 - Copy properties or location
 
@@ -45,7 +45,6 @@ Get file or Folder Properties.
 - We can change copy action in setting using `properties.settings.copyAction` to `Location` to copy only file or folder path.
 - The selection details may not show if the current active file size is greater than `20mb` due to vscode limitations.
 - The `Extension` and `Mime Type` will only show to file properties and will be hidden in folder properties
-- Show or Hide any audio, video and image properties using `properties.settings.metaData` in vscode settings.
 
 ## Author
 
