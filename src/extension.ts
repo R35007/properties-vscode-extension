@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as humanizeDuration from "humanize-duration";
+import * as fsProps from "fs-props";
 import * as vscode from 'vscode';
-import { cleanEntries, convertBytes, formatDate, getAudioDetails, getImageDetails, getSelectionDetails, getStats, getVideoDetails } from './helpers';
+import { cleanEntries, formatDate, getPathDetails } from './helpers';
+import { getSelectionDetails } from "./selection";
 import { Settings } from './Settings';
-
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -18,19 +18,17 @@ export function activate(context: vscode.ExtensionContext) {
 				cancellable: true
 			}, async (_progress, token) => {
 
-				const stats = await getStats(fsPath);
+				const props = await fsProps.properties(fsPath);
+				const { workspace, location, directory } = getPathDetails(fsPath);
 				const selection = getSelectionDetails(fsPath);
-				const image: any = stats.mimeType.includes('image') ? await getImageDetails(fsPath) : "";
-				const audio = stats.mimeType.includes('audio') ? await getAudioDetails(fsPath) : "";
-				const video = stats.mimeType.includes('video') ? await getVideoDetails(fsPath) : "";
 
 				const pathDetails = cleanEntries({
-					"Name": stats.name,
-					"Extension": stats.isFile && stats.extension,
-					"Mime Type": stats.isFile && stats.mimeType,
-					"Size": convertBytes(stats.size),
-					"Contains": !stats.isFile && stats.contains && `${stats.contains?.files} Files, ${stats.contains?.folders} Folders`,
-				}).map(([key, val]) => `${key} : ${val}`).join("\n");
+					"Name": props.isFile ? props.baseName : props.fileName,
+					"Extension": props.isFile && props.extension,
+					"Mime Type": props.isFile && props.mimeType,
+					"Size": props.sizePretty,
+					"Contains": !props.isFile && props.containsPretty,
+				}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 				const selectionDetails = cleanEntries(selection ? {
 					"Lines": selection.lines,
@@ -39,62 +37,62 @@ export function activate(context: vscode.ExtensionContext) {
 					"Object Size": selection.data.objectSize,
 					"Nodes": selection.data.nodes,
 					"Child Nodes": selection.data.childNodes,
-				} : {}).map(([key, val]) => `${key} : ${val}`).join(", ");
+				} : {}).map(([key, val]: [string, any]) => `${key} : ${val}`).join(", ");
 
-				const imageDetails = cleanEntries(image ? {
-					"Dimensions (W x H)": image.dimensions,
-					"Resolution (X x Y)": image.resolution,
-					"Orientation": image.orientation,
-					"Bit Depth": image.bitDepth,
-					"Color Type": image.colorType,
-					"Sub Sampling": image.subSampling,
-					"Compression": image.compression,
-					"Filter": image.filter,
-					"Resource URL": image.resourceURL,
-				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
+				const imageDetails = cleanEntries(props.isImage ? {
+					"Dimensions (W x H)": props.dimensions,
+					"Resolution (X x Y)": props.resolution,
+					"Orientation": props.orientation,
+					"Bit Depth": props.bitDepth,
+					"Color Type": props.colorType,
+					"Sub Sampling": props.subSampling,
+					"Compression": props.compression,
+					"Filter": props.filter,
+					"Resource URL": props.resourceURL,
+				} : {}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
-				const audioDetails = cleanEntries(audio ? {
-					"Title": audio.title,
-					"Album": audio.album,
-					"Artist": audio.artist,
-					"Composer": audio.composer,
-					"Genre": audio.genre,
-					"Bit Rate": audio.bitRate && convertBytes(audio.bitRate, ['bps', 'kbps', 'mbps'], false),
-					"Channels": audio.channels,
-					"Year": audio.year,
-					"Duration": typeof audio.duration !== 'undefined' && humanizeDuration(audio.duration * 1000, { maxDecimalPoints: 2 }),
-				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
+				const audioDetails = cleanEntries(props.isAudio ? {
+					"Title": props.title,
+					"Album": props.album,
+					"Artist": props.artist,
+					"Composer": props.composer,
+					"Genre": props.genre,
+					"Bit Rate": props.bitRatePretty,
+					"Channels": props.channels,
+					"Year": props.year,
+					"Duration": props.durationPretty,
+				} : {}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
-				const videoDetails = cleanEntries(video ? {
-					"Dimensions (W x H)": video.dimensions,
-					"Frame Rate": video.frameRate && `${video.frameRate}fps`,
-					"Bit Rate": video.bitRate && convertBytes(video.bitRate, ['bps', 'kbps', 'mbps'], false),
-					"Ratio": video.ratio,
-					"Duration": typeof video.duration !== 'undefined' && humanizeDuration(video.duration * 1000, { maxDecimalPoints: 2 }),
-				} : {}).map(([key, val]) => `${key} : ${val}`).join("\n");
+				const videoDetails = cleanEntries(props.isVideo ? {
+					"Dimensions (W x H)": props.dimensions,
+					"Frame Rate": props.frameRatePretty,
+					"Bit Rate": props.bitRatePretty,
+					"Ratio": props.ratio,
+					"Duration": props.durationPretty,
+				} : {}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 				const locationDetails = cleanEntries({
-					"Workspace": Settings.relativeToWorkspace && stats.workspace?.fsPath,
-					"Directory": stats.directory,
-					"Location": stats.location,
-				}).map(([key, val]) => `${key} : ${val}`).join("\n");
+					"Workspace": Settings.relativeToWorkspace && workspace?.fsPath,
+					"Directory": directory,
+					"Location": location,
+				}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 				const timestampDetails = cleanEntries({
-					"Created": Settings.timeStamps.createdTimestamp && stats.created && formatDate(stats.created),
-					"Changed": Settings.timeStamps.changedTimestamp && stats.changed && formatDate(stats.changed),
-					"Modified": Settings.timeStamps.modifiedTimestamp && stats.modified && formatDate(stats.modified),
-					"Accessed": Settings.timeStamps.accessedTimestamp && stats.accessed && formatDate(stats.accessed),
-				}).map(([key, val]) => `${key} : ${val}`).join("\n");
+					"Created": Settings.timeStamps.createdTimestamp && props.timestamps.created && formatDate(props.timestamps.created, props.timestamps.createdRelative),
+					"Changed": Settings.timeStamps.changedTimestamp && props.timestamps.changed && formatDate(props.timestamps.changed, props.timestamps.changedRelative),
+					"Modified": Settings.timeStamps.modifiedTimestamp && props.timestamps.modified && formatDate(props.timestamps.modified, props.timestamps.modifiedRelative),
+					"Accessed": Settings.timeStamps.accessedTimestamp && props.timestamps.accessed && formatDate(props.timestamps.accessed, props.timestamps.accessedRelative),
+				}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 
 				const result = [pathDetails, selectionDetails, imageDetails, audioDetails, videoDetails, locationDetails, timestampDetails]
 					.filter(Boolean)
 					.join('\n----------------------------------------------------------------------\n');
 
-				!token.isCancellationRequested && vscode.window.showInformationMessage(stats.fileName, { modal: true, detail: result }, `Copy ${Settings.copyAction}`)
+				!token.isCancellationRequested && vscode.window.showInformationMessage(props.fileName, { modal: true, detail: result }, `Copy ${Settings.copyAction}`)
 					.then(action => {
 						if (action) {
-							const copyText = Settings.copyAction === "Properties" ? `${stats.fileName}\n\n${result}` : stats.location;
+							const copyText = Settings.copyAction === "Properties" ? `${props.fileName}\n\n${result}` : props.location;
 							vscode.env.clipboard.writeText(copyText);
 							vscode.window.showInformationMessage(`${Settings.copyAction} Copied to clipboard 📋!`);
 						}

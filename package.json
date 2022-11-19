@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "10.0.0",
+	"version": "10.1.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -163,11 +163,6 @@
 	},
 	"devDependencies": {
 		"@types/dateformat": "^3.0.1",
-		"@types/fluent-ffmpeg": "^2.1.20",
-		"@types/humanize-duration": "^3.27.1",
-		"@types/image-size": "^0.8.0",
-		"@types/mime": "^3.0.1",
-		"@types/moment": "^2.13.0",
 		"@types/node": "^14.18.33",
 		"@types/vscode": "^1.73.0",
 		"@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -176,15 +171,9 @@
 		"typescript": "^4.5.5"
 	},
 	"dependencies": {
-		"@ffprobe-installer/ffprobe": "^1.4.1",
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
-		"exifreader": "^4.8.1",
-		"fluent-ffmpeg": "^2.1.2",
-		"humanize-duration": "^3.27.3",
-		"image-size": "^1.0.2",
-		"jsdom": "^20.0.2",
-		"mime": "^3.0.0",
-		"moment": "^2.29.4"
+		"fs-props": "^1.1.1",
+		"jsdom": "^20.0.2"
 	}
 }

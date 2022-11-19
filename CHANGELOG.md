@@ -1,5 +1,9 @@
 # Change Log
 
+## [v10.1.0]
+
+- using `fs-props` node package to collect properties.
+
 ## [v10.0.0]
 
 - Removed Show hide settings.
