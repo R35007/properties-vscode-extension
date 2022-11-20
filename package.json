@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "10.1.0",
+	"version": "10.2.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -173,7 +173,7 @@
 	"dependencies": {
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
-		"fs-props": "^1.1.1",
+		"fs-props": "^3.0.5",
 		"jsdom": "^20.0.2"
 	}
 }

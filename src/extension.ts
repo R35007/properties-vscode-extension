@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 				cancellable: true
 			}, async (_progress, token) => {
 
-				const props = await fsProps.properties(fsPath);
+				const props = await fsProps.props(fsPath);
 				const { workspace, location, directory } = getPathDetails(fsPath);
 				const selection = getSelectionDetails(fsPath);
 
@@ -78,10 +78,10 @@ export function activate(context: vscode.ExtensionContext) {
 				}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 				const timestampDetails = cleanEntries({
-					"Created": Settings.timeStamps.createdTimestamp && props.timestamps.created && formatDate(props.timestamps.created, props.timestamps.createdRelative),
-					"Changed": Settings.timeStamps.changedTimestamp && props.timestamps.changed && formatDate(props.timestamps.changed, props.timestamps.changedRelative),
-					"Modified": Settings.timeStamps.modifiedTimestamp && props.timestamps.modified && formatDate(props.timestamps.modified, props.timestamps.modifiedRelative),
-					"Accessed": Settings.timeStamps.accessedTimestamp && props.timestamps.accessed && formatDate(props.timestamps.accessed, props.timestamps.accessedRelative),
+					"Created": Settings.timeStamps.createdTimestamp && props.created && formatDate(props.created, props.createdRelative),
+					"Changed": Settings.timeStamps.changedTimestamp && props.changed && formatDate(props.changed, props.changedRelative),
+					"Modified": Settings.timeStamps.modifiedTimestamp && props.modified && formatDate(props.modified, props.modifiedRelative),
+					"Accessed": Settings.timeStamps.accessedTimestamp && props.accessed && formatDate(props.accessed, props.accessedRelative),
 				}).map(([key, val]: [string, any]) => `${key} : ${val}`).join("\n");
 
 

@@ -1,5 +1,9 @@
 # Change Log
 
+## [v10.2.0]
+
+- node packages updated.
+
 ## [v10.1.0]
 
 - using `fs-props` node package to collect properties.
