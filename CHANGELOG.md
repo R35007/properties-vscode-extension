@@ -1,5 +1,13 @@
 # Change Log
 
+## [v11.0.0]
+
+- Build size reduced.
+- Added - Get properties from multiple selected files and folders on vscode explorer.
+- Extension break on Mac os issue fixed. 
+- Removed `properties.settings.copyAction` as `Location` since copy selected file paths and relative paths is already provided by vscode
+- Added - `properties.settings.ffprobePath` settings. Provide a custom path to ffprobe executable path to get the audio and video properties.
+  
 ## [v10.2.0]
 
 - node packages updated.

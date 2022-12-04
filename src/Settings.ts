@@ -26,7 +26,7 @@ export class Settings {
   static get relativeToWorkspace() {
     return Settings.getSettings("relativeToWorkspace") as boolean;
   }
-  static get copyAction() {
-    return Settings.getSettings("copyAction") as "Properties" | "Location";
+  static get ffprobePath() {
+    return Settings.getSettings("ffprobePath") as string | undefined;
   }
 }

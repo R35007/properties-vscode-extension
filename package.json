@@ -1,8 +1,8 @@
-{
+{ 
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "10.2.0",
+	"version": "11.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -59,14 +59,13 @@
 			"type": "object",
 			"title": "Properties Configuration",
 			"properties": {
-				"properties.settings.relativeToWorkspace": {
-					"order": 2,
-					"type": "boolean",
-					"default": false,
-					"description": "If true the Directory and Location will be relative to current workspace folder."
+				"properties.settings.ffprobePath": {
+					"order": 1,
+					"type": "string",
+					"description": "Custom Path to ffmpeg executable path to get audio and video properties"
 				},
 				"properties.settings.timeStamps": {
-					"order": 6,
+					"order": 2,
 					"type": "object",
 					"default": {
 						"createdTimestamp": true,
@@ -105,24 +104,16 @@
 					"description": "Show timestamp details.",
 					"additionalProperties": false
 				},
+				"properties.settings.relativeToWorkspace": {
+					"order": 3,
+					"type": "boolean",
+					"default": false,
+					"description": "If true the Directory and Location will be relative to current workspace folder."
+				},
 				"properties.settings.dateTimeFormat": {
-					"order": 7,
+					"order": 4,
 					"type": "string",
 					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
-				},
-				"properties.settings.copyAction": {
-					"order": 8,
-					"type": "string",
-					"default": "Properties",
-					"enum": [
-						"Properties",
-						"Location"
-					],
-					"enumDescriptions": [
-						"Copy full Properties",
-						"Copy Location"
-					],
-					"markdownDescription": "On click of copy button determine what action to perform"
 				}
 			}
 		},
@@ -173,7 +164,7 @@
 	"dependencies": {
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
-		"fs-props": "^3.0.5",
+		"fs-props": "^3.2.0",
 		"jsdom": "^20.0.2"
 	}
 }

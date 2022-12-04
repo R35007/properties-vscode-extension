@@ -2,6 +2,7 @@
 
 Get file or Folder Properties.
 
+- Get properties of a multiple selected files and folders
 - File `Name` and `Extension`.
 - File or Folder `Size`.
 - File `Mime Type`.
@@ -14,28 +15,8 @@ Get file or Folder Properties.
 - Timestamp of `created`, `changed`, `modified`, `accessed` with relative timestamp .
 - Copy properties or location
 
-<div style="display: flex; flex-wrap: wrap; gap: 1rem">
-  <div>
-    <h2>Folder Properties</h2>
-    <img src="./images/folder-properties.png" alt="Screenshot" width="500">
-  </div>
-  <div>
-    <h2>File Properties</h2>
-    <img src="./images/file-properties.png" alt="Screenshot" width="500">
-  </div>
-  <div>
-    <h2>Image Properties</h2>
-    <img src="./images/image-properties.png" alt="Screenshot" width="500">
-  </div>
-  <div>
-    <h2>Audio Properties</h2>
-    <img src="./images/audio-properties.png" alt="Screenshot" width="500">
-  </div>
-  <div>
-    <h2>Video Properties</h2>
-    <img src="./images/video-properties.png" alt="Screenshot" width="500">
-  </div>
-</div>
+## Preview 
+<img src="https://user-images.githubusercontent.com/23217228/205488891-68401b6d-6c42-438f-80ec-cac31de3cffd.gif" alt="Folder Properties" width="100%" style="max-width: 1300px">
 
 ## Usage
 
