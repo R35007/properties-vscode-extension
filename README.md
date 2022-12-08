@@ -27,6 +27,11 @@ Get file or Folder Properties.
 - The selection details may not show if the current active file size is greater than `20mb` due to vscode limitations.
 - The `Extension` and `Mime Type` will only show to file properties and will be hidden in folder properties
 
+## Audio and Video Properties
+
+ - To get audio and video properties we need to provide the [ffprobe](https://ffmpeg.org/download.html) executable path in `properties.settings.ffprobePath`
+ - This helps to get the additional properties of audio or video file properties like duration, album, composer, resolutions etc..
+
 ## Author
 
 Sivaraman - [sendmsg2siva.siva@gmail.com](sendmsg2siva.siva@gmail.com)

@@ -1,5 +1,10 @@
 # Change Log
 
+## [v12.0.0]
+
+- Build size reduced using webpack.
+- Removed exporting ffprobe executable for windows. Since this is a platform specific package, please download the [ffprobe](https://ffmpeg.org/download.html) executable file and give the path in `properties.settings.ffprobePath` to get audio and video properties like duration, album, artist etc..
+  
 ## [v11.0.0]
 
 - Build size reduced.

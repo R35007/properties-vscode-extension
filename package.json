@@ -1,8 +1,8 @@
-{ 
+{
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "11.0.0",
+	"version": "12.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -17,29 +17,6 @@
 	"engines": {
 		"vscode": "^1.73.0"
 	},
-	"keywords": [
-		"Properties",
-		"File properties",
-		"Folder properties",
-		"Image properties",
-		"Audio properties",
-		"Video properties",
-		"Audio durations",
-		"Video durations",
-		"Image dimensions",
-		"mime type",
-		"folder size",
-		"file size",
-		"timestamp",
-		"selection details",
-		"lines",
-		"words",
-		"object size",
-		"array length",
-		"nodes count",
-		"stats",
-		"statistics"
-	],
 	"categories": [
 		"Other"
 	],
@@ -47,7 +24,7 @@
 		"onCommand:properties.show",
 		"onStartupFinished"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
@@ -145,26 +122,45 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"compile-tests": "tsc -p . --outDir out"
 	},
 	"devDependencies": {
 		"@types/dateformat": "^3.0.1",
-		"@types/node": "^14.18.33",
+		"@types/fluent-ffmpeg": "^2.1.20",
+		"@types/humanize-duration": "^3.27.1",
+		"@types/image-size": "^0.8.0",
+		"@types/mime": "^3.0.1",
+		"@types/moment": "^2.13.0",
+		"@types/node": "14.x",
 		"@types/vscode": "^1.73.0",
 		"@typescript-eslint/eslint-plugin": "^5.16.0",
 		"@typescript-eslint/parser": "^5.16.0",
+		"copy-webpack-plugin": "^11.0.0",
 		"eslint": "^8.11.0",
-		"typescript": "^4.5.5"
+		"ts-loader": "^9.2.8",
+		"typescript": "^4.5.5",
+		"webpack": "^5.70.0",
+		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
 		"dateformat": "^4.6.3",
 		"durable-json-lint": "^0.0.3",
-		"fs-props": "^3.2.0",
-		"jsdom": "^20.0.2"
+		"exifreader": "^4.8.1",
+		"fluent-ffmpeg": "^2.1.2",
+		"humanize-duration": "^3.27.3",
+		"image-size": "^1.0.2",
+		"jsdom": "^20.0.2",
+		"mime": "^3.0.0",
+		"moment": "^2.29.4"
+	},
+	"__metadata": {
+		"id": "6c8cc641-9672-4527-9e07-71d2e117e2d6",
+		"publisherDisplayName": "Thinker",
+		"publisherId": "d7e8a1f3-3e2a-4cbb-9922-0b82a077c082",
+		"isPreReleaseVersion": false
 	}
 }

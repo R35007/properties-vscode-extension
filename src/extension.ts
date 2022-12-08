@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as fsProps from "fs-props";
+import * as fsProps from "./fs-props";
 import * as path from "path";
 import * as vscode from 'vscode';
 import { cleanEntries, formatDate, normalizeSelectedPaths, getPathDetails, getSelectedItems as getSelectedItemPaths, getMultiplePathDetails } from './helpers';
@@ -15,8 +15,12 @@ export function activate(context: vscode.ExtensionContext) {
 			const normalizedPaths = normalizeSelectedPaths(selectedPaths);
 
 			// Set custom ffprobe path
-			if (Settings.ffprobePath) {
-				fsProps.setFfprobePath(Settings.ffprobePath);
+			if(Settings.ffprobePath){
+				try {
+					fsProps.setFfprobePath(Settings.ffprobePath);
+				} catch (err) {
+					console.error(err);
+				}
 			}
 
 			if (!normalizedPaths.length) return; // return if no file or folder is selected
