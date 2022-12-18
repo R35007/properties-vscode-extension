@@ -1,5 +1,9 @@
 # Change Log
 
+## [v12.0.1]
+
+- Typo fixes.
+
 ## [v12.0.0]
 
 - Build size reduced using webpack.

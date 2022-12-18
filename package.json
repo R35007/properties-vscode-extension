@@ -2,7 +2,7 @@
 	"name": "properties",
 	"displayName": "Properties",
 	"description": "Get file or Folder Properties",
-	"version": "12.0.0",
+	"version": "12.0.1",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/logo.png",
@@ -39,7 +39,7 @@
 				"properties.settings.ffprobePath": {
 					"order": 1,
 					"type": "string",
-					"description": "Custom Path to ffmpeg executable path to get audio and video properties"
+					"description": "Custom Path to ffprobe executable path to get audio and video properties"
 				},
 				"properties.settings.timeStamps": {
 					"order": 2,
