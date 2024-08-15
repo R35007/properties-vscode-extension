@@ -1,166 +1,166 @@
 {
-	"name": "properties",
-	"displayName": "Properties",
-	"description": "Get file or Folder Properties",
-	"version": "12.0.1",
-	"publisher": "Thinker",
-	"license": "MIT",
-	"icon": "images/logo.png",
-	"author": {
-		"name": "Sivaraman",
-		"email": "sendmsg2siva@gmail.com"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/R35007/properties-vscode-extension"
-	},
-	"engines": {
-		"vscode": "^1.73.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:properties.show",
-		"onStartupFinished"
-	],
-	"main": "./dist/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "properties.show",
-				"title": "Properties"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Properties Configuration",
-			"properties": {
-				"properties.settings.ffprobePath": {
-					"order": 1,
-					"type": "string",
-					"description": "Custom Path to ffprobe executable path to get audio and video properties"
-				},
-				"properties.settings.timeStamps": {
-					"order": 2,
-					"type": "object",
-					"default": {
-						"createdTimestamp": true,
-						"changedTimestamp": true,
-						"accessedTimestamp": true,
-						"modifiedTimestamp": true,
-						"relativeTimestamp": true
-					},
-					"properties": {
-						"createdTimestamp": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show created timestamp."
-						},
-						"changedTimestamp": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show changed timestamp."
-						},
-						"accessedTimestamp": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show accessed timestamp."
-						},
-						"modifiedTimestamp": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show modified timestamp."
-						},
-						"relativeTimestamp": {
-							"type": "boolean",
-							"default": true,
-							"description": "Show relative timestamp."
-						}
-					},
-					"description": "Show timestamp details.",
-					"additionalProperties": false
-				},
-				"properties.settings.relativeToWorkspace": {
-					"order": 3,
-					"type": "boolean",
-					"default": false,
-					"description": "If true the Directory and Location will be relative to current workspace folder."
-				},
-				"properties.settings.dateTimeFormat": {
-					"order": 4,
-					"type": "string",
-					"markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
-				}
-			}
-		},
-		"menus": {
-			"explorer/context": [
-				{
-					"command": "properties.show",
-					"when": "sideBarFocus && activeViewlet == 'workbench.view.explorer'"
-				}
-			],
-			"editor/context": [
-				{
-					"command": "properties.show",
-					"when": "isFileSystemResource"
-				}
-			],
-			"editor/title/context": [
-				{
-					"command": "properties.show",
-					"when": "isFileSystemResource"
-				}
-			],
-			"commandPalette": [
-				{
-					"command": "properties.show",
-					"when": "false"
-				}
-			]
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run package",
-		"compile": "webpack",
-		"watch": "webpack --watch",
-		"package": "webpack --mode production --devtool hidden-source-map",
-		"compile-tests": "tsc -p . --outDir out"
-	},
-	"devDependencies": {
-		"@types/dateformat": "^3.0.1",
-		"@types/fluent-ffmpeg": "^2.1.20",
-		"@types/humanize-duration": "^3.27.1",
-		"@types/image-size": "^0.8.0",
-		"@types/mime": "^3.0.1",
-		"@types/moment": "^2.13.0",
-		"@types/node": "14.x",
-		"@types/vscode": "^1.73.0",
-		"@typescript-eslint/eslint-plugin": "^5.16.0",
-		"@typescript-eslint/parser": "^5.16.0",
-		"copy-webpack-plugin": "^11.0.0",
-		"eslint": "^8.11.0",
-		"ts-loader": "^9.2.8",
-		"typescript": "^4.5.5",
-		"webpack": "^5.70.0",
-		"webpack-cli": "^4.9.2"
-	},
-	"dependencies": {
-		"dateformat": "^4.6.3",
-		"durable-json-lint": "^0.0.3",
-		"exifreader": "^4.8.1",
-		"fluent-ffmpeg": "^2.1.2",
-		"humanize-duration": "^3.27.3",
-		"image-size": "^1.0.2",
-		"jsdom": "^20.0.2",
-		"mime": "^3.0.0",
-		"moment": "^2.29.4"
-	},
-	"__metadata": {
-		"id": "6c8cc641-9672-4527-9e07-71d2e117e2d6",
-		"publisherDisplayName": "Thinker",
-		"publisherId": "d7e8a1f3-3e2a-4cbb-9922-0b82a077c082",
-		"isPreReleaseVersion": false
-	}
+  "name": "properties",
+  "displayName": "Properties",
+  "description": "Get file or Folder Properties",
+  "version": "12.0.2",
+  "publisher": "Thinker",
+  "license": "MIT",
+  "icon": "images/logo.png",
+  "author": {
+    "name": "Sivaraman",
+    "email": "sendmsg2siva@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/R35007/properties-vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:properties.show",
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "properties.show",
+        "title": "Properties"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Properties Configuration",
+      "properties": {
+        "properties.settings.ffprobePath": {
+          "order": 1,
+          "type": "string",
+          "description": "Custom Path to ffprobe executable path to get audio and video properties"
+        },
+        "properties.settings.timeStamps": {
+          "order": 2,
+          "type": "object",
+          "default": {
+            "createdTimestamp": true,
+            "changedTimestamp": true,
+            "accessedTimestamp": true,
+            "modifiedTimestamp": true,
+            "relativeTimestamp": true
+          },
+          "properties": {
+            "createdTimestamp": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show created timestamp."
+            },
+            "changedTimestamp": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show changed timestamp."
+            },
+            "accessedTimestamp": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show accessed timestamp."
+            },
+            "modifiedTimestamp": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show modified timestamp."
+            },
+            "relativeTimestamp": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show relative timestamp."
+            }
+          },
+          "description": "Show timestamp details.",
+          "additionalProperties": false
+        },
+        "properties.settings.relativeToWorkspace": {
+          "order": 3,
+          "type": "boolean",
+          "default": false,
+          "description": "If true the Directory and Location will be relative to current workspace folder."
+        },
+        "properties.settings.dateTimeFormat": {
+          "order": 4,
+          "type": "string",
+          "markdownDescription": "Sets a custom [date/time](https://www.npmjs.com/package/dateformat#mask-options) format. If null the default locale string conversion is used.\n\n‎\n\n**Example:**\n\n - `default` - ddd mmm dd yyyy HH:MM:ss \n - `shortDate` - m/d/yy \n - `paddedShortDate` - mm/dd/yyyy \n - `mediumDate` - mmm d, yyyy \n - `longDate` - mmmm d, yyyy \n - `fullDate` - dddd, mmmm d, yyyy \n - `shortTime` - h:MM TT \n - `mediumTime` - h:MM:ss TT \n - `longTime` - h:MM:ss TT Z \n - `isoDate` - yyyy-mm-dd \n - `isoTime` - HH:MM:ss \n - `isoDateTime` - yyyy-mm-dd'T'HH:MM:sso \n - `isoUtcDateTime` - UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+        }
+      }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "properties.show",
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer'"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "properties.show",
+          "when": "isFileSystemResource"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "properties.show",
+          "when": "isFileSystemResource"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "properties.show",
+          "when": "false"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out"
+  },
+  "devDependencies": {
+    "@types/dateformat": "^3.0.1",
+    "@types/fluent-ffmpeg": "^2.1.20",
+    "@types/humanize-duration": "^3.27.1",
+    "@types/image-size": "^0.8.0",
+    "@types/mime": "^3.0.1",
+    "@types/moment": "^2.13.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.73.0",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "eslint": "^8.11.0",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.5.5",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "dateformat": "^4.6.3",
+    "durable-json-lint": "^0.0.3",
+    "exifreader": "^4.8.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "humanize-duration": "^3.27.3",
+    "image-size": "^1.0.2",
+    "jsdom": "^20.0.2",
+    "mime": "^3.0.0",
+    "moment": "^2.29.4"
+  },
+  "__metadata": {
+    "id": "6c8cc641-9672-4527-9e07-71d2e117e2d6",
+    "publisherDisplayName": "Thinker",
+    "publisherId": "d7e8a1f3-3e2a-4cbb-9922-0b82a077c082",
+    "isPreReleaseVersion": false
+  }
 }

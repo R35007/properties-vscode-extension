@@ -1,5 +1,9 @@
 # Change Log
 
+## [v12.0.2]
+
+- Readme update
+
 ## [v12.0.1]
 
 - Typo fixes.

@@ -15,6 +15,10 @@ Get file or Folder Properties.
 - Timestamp of `created`, `changed`, `modified`, `accessed` with relative timestamp .
 - Copy properties or location
 
+<a href="https://buymeacoffee.com/r35007" target="_blank">
+  <img src="https://r35007.github.io/Siva_Profile/images//buymeacoffee.png" />
+</a>
+
 ## Preview 
 <img src="https://user-images.githubusercontent.com/23217228/205488891-68401b6d-6c42-438f-80ec-cac31de3cffd.gif" alt="Folder Properties" width="100%" style="max-width: 1300px">
 
