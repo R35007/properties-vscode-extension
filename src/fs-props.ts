@@ -209,9 +209,9 @@ export const humanizeDuration = (durationInMilliSeconds?: number | string, optio
   return humanize(duration, { maxDecimalPoints: 2, ...options });
 };
 
-const getImageDimensions = (metaData: Awaited<ReturnType<typeof ExifReader.load>>) => {
-  const width = metaData.ImageWidth?.value ?? metaData["Image Width"]?.description ?? metaData.PixelXDimension?.value;
-  const height = metaData.ImageLength?.value ?? metaData["Image Height"]?.description ?? metaData.PixelYDimension?.value;
+const getImageDimensions = (metaData: ExifReader.Tags) => {
+  const width = metaData.ImageWidth?.value as number ?? metaData["Image Width"]?.description ?? metaData.PixelXDimension?.value as string;
+  const height = metaData.ImageLength?.value as number ?? metaData["Image Height"]?.description ?? metaData.PixelYDimension?.value as string;
   return {
     dimensions: typeof width !== "undefined" && typeof height !== "undefined" ? `${width} x ${height} pixels` : undefined,
     width,

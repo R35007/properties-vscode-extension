@@ -1,6 +1,6 @@
-import { FfprobeData } from 'fluent-ffmpeg';
-import { Stats, Dirent } from 'fs';
 import * as ExifReader from "exifreader";
+import { FfprobeData } from 'fluent-ffmpeg';
+import { Dirent, Stats } from 'fs';
 
 export type StatsProps = {
   fileName: string;
@@ -61,7 +61,7 @@ export type ImageProps = {
   dimensions?: string;
   width?: string | number;
   height?: string | number;
-  metaData?: Awaited<ReturnType<typeof ExifReader.load>> | ISize
+  metaData?: ExifReader.Tags | ISize
 };
 
 export type AudioProps = {
