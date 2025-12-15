@@ -1,6 +1,6 @@
 import * as ExifReader from "exifreader";
-import { FfprobeData } from 'fluent-ffmpeg';
-import { Dirent, Stats } from 'fs';
+import { FfprobeData } from "fluent-ffmpeg";
+import { Dirent, Stats } from "fs";
 
 export type StatsProps = {
   fileName: string;
@@ -15,10 +15,18 @@ export type StatsProps = {
   isFile: boolean;
   isDirectory: boolean;
   children: Dirent[];
-  containedFiles?: number;
-  containedFolders?: number;
-  contains?: { files: number; folders: number };
-  containsPretty?: string;
+  filesCount: number;
+  foldersCount: number;
+  filesAndFoldersPrettyCount?: string;
+  nestedFilesCount?: number;
+  nestedFoldersCount?: number;
+  nestedFilesAndFoldersPrettyCount?: string;
+  counts?: {
+    filesCount: number;
+    foldersCount: number;
+    nestedFilesCount: number;
+    nestedFoldersCount: number;
+  };
   created: Date;
   changed: Date;
   modified: Date;
@@ -61,7 +69,7 @@ export type ImageProps = {
   dimensions?: string;
   width?: string | number;
   height?: string | number;
-  metaData?: ExifReader.Tags | ISize
+  metaData?: ExifReader.Tags | ISize;
 };
 
 export type AudioProps = {

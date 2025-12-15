@@ -1,5 +1,9 @@
 # Change Log
 
+## [v12.1.0]
+
+- Added – Display counts for top-level files and folders, as well as nested files and folders.
+  
 ## [v12.0.2]
 
 - Readme update

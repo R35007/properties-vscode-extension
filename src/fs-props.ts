@@ -1,6 +1,6 @@
 import * as ExifReader from "exifreader";
-import * as ffmpeg from 'fluent-ffmpeg';
-import { FfprobeStream } from 'fluent-ffmpeg';
+import * as ffmpeg from "fluent-ffmpeg";
+import { FfprobeStream } from "fluent-ffmpeg";
 import * as fs from "fs";
 import * as fsProm from "fs/promises";
 import * as humanize from "humanize-duration";
@@ -9,23 +9,28 @@ import * as mime from "mime";
 import * as moment from "moment";
 import * as path from "path";
 
-import { AudioProps, ImageProps, Properties, StatsProps, VideoProps } from './types';
+import { AudioProps, ImageProps, Properties, StatsProps, VideoProps } from "./types";
 
 const getSizeAndContains = async (fsPath: string) => {
   const stats = await fsProm.stat(fsPath);
 
-  if (stats.isFile()) return { size: stats.size, contains: undefined };
+  if (stats.isFile()) return { size: stats.size, counts: undefined };
 
-  const contains = { files: 0, folders: 0 };
+  const counts = { filesCount: 0, foldersCount: 0, nestedFilesCount: 0, nestedFoldersCount: 0 };
 
-  const dirSizes = async (fsPath: string): Promise<number[]> => {
+  const dirSizes = async (fsPath: string, level = 0): Promise<number[]> => {
     const files = await fsProm.readdir(fsPath, { withFileTypes: true });
-    const statsList = files.map(async file => {
+    const statsList = files.map(async (file) => {
       const filePath = path.join(fsPath, file.name);
       const { size } = await fsProm.stat(filePath);
-      if (file.isFile()) { contains.files++; return [size]; };
-      contains.folders++;
-      const sizes = await dirSizes(filePath);
+      if (file.isFile()) {
+        counts.nestedFilesCount++;
+        level === 0 && counts.filesCount++;
+        return [size];
+      }
+      counts.nestedFoldersCount++;
+      level === 0 && counts.foldersCount++;
+      const sizes = await dirSizes(filePath, level + 1);
       return [size, ...sizes];
     });
     const fsStatsList = await Promise.all(statsList);
@@ -34,23 +39,28 @@ const getSizeAndContains = async (fsPath: string) => {
 
   const dirSize = (await dirSizes(fsPath)).reduce((res, size) => res + size, 0);
 
-  return { size: dirSize, contains };
+  return { size: dirSize, counts };
 };
 
 const getSizeAndContainsSync = (fsPath: string) => {
   const stats = fs.statSync(fsPath);
 
-  if (stats.isFile()) return { size: stats.size, contains: undefined };
+  if (stats.isFile()) return { size: stats.size, counts: undefined };
 
-  const contains = { files: 0, folders: 0 };
+  const counts = { filesCount: 0, foldersCount: 0, nestedFilesCount: 0, nestedFoldersCount: 0 };
 
-  const dirSizes = (fsPath: string): number[] => {
+  const dirSizes = (fsPath: string, level = 0): number[] => {
     const files = fs.readdirSync(fsPath, { withFileTypes: true });
-    const statsList = files.map(file => {
+    const statsList = files.map((file) => {
       const filePath = path.join(fsPath, file.name);
       const { size } = fs.statSync(filePath);
-      if (file.isFile()) { contains.files++; return [size]; };
-      contains.folders++;
+      if (file.isFile()) {
+        counts.nestedFilesCount++;
+        level === 0 && counts.filesCount++;
+        return [size];
+      }
+      counts.nestedFoldersCount++;
+      level === 0 && counts.foldersCount++;
       const sizes = dirSizes(filePath);
       return [size, ...sizes];
     });
@@ -59,7 +69,7 @@ const getSizeAndContainsSync = (fsPath: string) => {
 
   const dirSize = dirSizes(fsPath).reduce((res, size) => res + size, 0);
 
-  return { size: dirSize, contains };
+  return { size: dirSize, counts };
 };
 
 /**
@@ -76,7 +86,7 @@ export const setFfprobePath = (ffprobePath: string) => {
  * @param {string} fsPath - The path to the file or directory.
  */
 export const timeStamp = async (fsPathOrStat: string | fs.Stats) => {
-  const stats = typeof fsPathOrStat === 'string' ? await fsProm.stat(fsPathOrStat) : fsPathOrStat;
+  const stats = typeof fsPathOrStat === "string" ? await fsProm.stat(fsPathOrStat) : fsPathOrStat;
   const created = stats.birthtime;
   const changed = stats.ctime;
   const modified = stats.mtime;
@@ -97,8 +107,6 @@ export const timeStamp = async (fsPathOrStat: string | fs.Stats) => {
   const modifiedMs = stats.mtimeMs;
   const accessedMs = stats.atimeMs;
 
-
-
   return {
     created,
     changed,
@@ -115,7 +123,7 @@ export const timeStamp = async (fsPathOrStat: string | fs.Stats) => {
     createdRelative,
     changedRelative,
     modifiedRelative,
-    accessedRelative
+    accessedRelative,
   };
 };
 
@@ -125,7 +133,7 @@ export const timeStamp = async (fsPathOrStat: string | fs.Stats) => {
  * @param {string} fsPath - The path to the file or directory.
  */
 export const timeStampSync = (fsPathOrStat: string | fs.Stats) => {
-  const stats = typeof fsPathOrStat === 'string' ? fs.statSync(fsPathOrStat) : fsPathOrStat;
+  const stats = typeof fsPathOrStat === "string" ? fs.statSync(fsPathOrStat) : fsPathOrStat;
   const created = stats.birthtime;
   const changed = stats.ctime;
   const modified = stats.mtime;
@@ -146,8 +154,6 @@ export const timeStampSync = (fsPathOrStat: string | fs.Stats) => {
   const modifiedMs = stats.mtimeMs;
   const accessedMs = stats.atimeMs;
 
-
-
   return {
     created,
     changed,
@@ -164,7 +170,7 @@ export const timeStampSync = (fsPathOrStat: string | fs.Stats) => {
     createdRelative,
     changedRelative,
     modifiedRelative,
-    accessedRelative
+    accessedRelative,
   };
 };
 
@@ -175,11 +181,11 @@ export const timeStampSync = (fsPathOrStat: string | fs.Stats) => {
  * @param [showBytes=true] - boolean - Whether to show the bytes in the string.
  * @returns A function that takes two parameters, bytes and sizes, and returns a string.
  */
-export const convertBytes = (bytes: number, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'], showBytes = true): string => {
-  if (bytes === 0) return '0 bytes';
+export const convertBytes = (bytes: number, sizes = ["Bytes", "KB", "MB", "GB", "TB"], showBytes = true): string => {
+  if (bytes === 0) return "0 bytes";
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  if (i === 0) return bytes + ' ' + sizes[i];
-  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i] + (showBytes ? ` (${bytes} bytes)` : "");
+  if (i === 0) return bytes + " " + sizes[i];
+  return (bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i] + (showBytes ? ` (${bytes} bytes)` : "");
 };
 
 /**
@@ -205,13 +211,15 @@ export const ffprobePromise = async (filePath: string) => {
 export const humanizeDuration = (durationInMilliSeconds?: number | string, options: object = {}) => {
   if (typeof durationInMilliSeconds === "undefined") return undefined;
 
-  const duration = typeof durationInMilliSeconds === 'number' ? durationInMilliSeconds : parseFloat(durationInMilliSeconds);
+  const duration = typeof durationInMilliSeconds === "number" ? durationInMilliSeconds : parseFloat(durationInMilliSeconds);
   return humanize(duration, { maxDecimalPoints: 2, ...options });
 };
 
 const getImageDimensions = (metaData: ExifReader.Tags) => {
-  const width = metaData.ImageWidth?.value as number ?? metaData["Image Width"]?.description ?? metaData.PixelXDimension?.value as string;
-  const height = metaData.ImageLength?.value as number ?? metaData["Image Height"]?.description ?? metaData.PixelYDimension?.value as string;
+  const width =
+    (metaData.ImageWidth?.value as number) ?? metaData["Image Width"]?.description ?? (metaData.PixelXDimension?.value as string);
+  const height =
+    (metaData.ImageLength?.value as number) ?? metaData["Image Height"]?.description ?? (metaData.PixelYDimension?.value as string);
   return {
     dimensions: typeof width !== "undefined" && typeof height !== "undefined" ? `${width} x ${height} pixels` : undefined,
     width,
@@ -230,7 +238,7 @@ const getImageResolution = (metaData: Awaited<ReturnType<typeof ExifReader.load>
 };
 
 /**
- * It returns an promise object with all the properties of the file or folder, 
+ * It returns an promise object with all the properties of the file or folder,
  * including the number of files and folders it contains
  * @param {string} fsPath - The path to the file or folder
  */
@@ -244,11 +252,11 @@ export const stat = async (fsPath: string): Promise<StatsProps> => {
   const location = fsPath.replace(/\\/g, "/");
   const directory = path.dirname(fsPath).replace(/\\/g, "/");
   const type = isFile ? "File" : "Folder";
-  const mimeType = isFile ? mime.getType(fsPath) || '[unknown]' : undefined;
+  const mimeType = isFile ? mime.getType(fsPath) || "[unknown]" : undefined;
   const children = isFile ? [] : await fsProm.readdir(fsPath, { withFileTypes: true });
 
   const timestamps = await timeStamp(stats);
-  const { size, contains } = await getSizeAndContains(fsPath);
+  const { size, counts } = await getSizeAndContains(fsPath);
 
   return {
     fileName,
@@ -263,17 +271,20 @@ export const stat = async (fsPath: string): Promise<StatsProps> => {
     isFile,
     isDirectory,
     children,
-    containedFiles: contains?.files,
-    containedFolders: contains?.folders,
-    contains,
-    containsPretty: contains ? `${contains.files} Files, ${contains.folders} Folders` : undefined,
+    filesCount: counts?.filesCount || 0,
+    foldersCount: counts?.foldersCount || 0,
+    nestedFilesCount: counts?.nestedFilesCount,
+    nestedFoldersCount: counts?.nestedFoldersCount,
+    counts,
+    filesAndFoldersPrettyCount: counts ? `${counts.filesCount} Files, ${counts.foldersCount} Folders` : undefined,
+    nestedFilesAndFoldersPrettyCount: counts ? `${counts.nestedFilesCount} Files, ${counts.nestedFoldersCount} Folders` : undefined,
     ...timestamps,
     stats,
   };
 };
 
 /**
- * It returns an object with all the properties of the file or folder, 
+ * It returns an object with all the properties of the file or folder,
  * including the number of files and folders it contains
  * @param {string} fsPath - The path to the file or folder
  */
@@ -287,11 +298,11 @@ export const statSync = (fsPath: string): StatsProps => {
   const location = fsPath.replace(/\\/g, "/");
   const directory = path.dirname(fsPath).replace(/\\/g, "/");
   const type = isFile ? "File" : "Folder";
-  const mimeType = isFile ? mime.getType(fsPath) || '[unknown]' : undefined;
+  const mimeType = isFile ? mime.getType(fsPath) || "[unknown]" : undefined;
   const children = isFile ? [] : fs.readdirSync(fsPath, { withFileTypes: true });
 
   const timestamps = timeStampSync(stats);
-  const { size, contains } = getSizeAndContainsSync(fsPath);
+  const { size, counts } = getSizeAndContainsSync(fsPath);
 
   return {
     fileName,
@@ -306,10 +317,13 @@ export const statSync = (fsPath: string): StatsProps => {
     isFile,
     isDirectory,
     children,
-    containedFiles: contains?.files,
-    containedFolders: contains?.folders,
-    contains,
-    containsPretty: contains ? `${contains.files} Files, ${contains.folders} Folders` : undefined,
+    filesCount: counts?.filesCount || 0,
+    foldersCount: counts?.foldersCount || 0,
+    nestedFilesCount: counts?.nestedFilesCount,
+    nestedFoldersCount: counts?.nestedFoldersCount,
+    counts,
+    filesAndFoldersPrettyCount: counts ? `${counts.filesCount} Files, ${counts.foldersCount} Folders` : undefined,
+    nestedFilesAndFoldersPrettyCount: counts ? `${counts.nestedFilesCount} Files, ${counts.nestedFoldersCount} Folders` : undefined,
     ...timestamps,
     stats,
   };
@@ -327,8 +341,16 @@ export const imageProps = async (imagePath: string): Promise<ImageProps> => {
       ...getImageDimensions(metaData),
       ...getImageResolution(metaData),
       orientation: metaData.Orientation?.description,
-      bitDepth: metaData["Bit Depth"]?.description ?? metaData.BitDepth?.description ?? metaData["Bits Per Sample"]?.description ?? metaData.BitsPerSample?.description,
-      colorType: metaData["Color Type"]?.description ?? metaData.ColorType?.description ?? metaData["Color Space"]?.description ?? metaData.ColorSpace?.description,
+      bitDepth:
+        metaData["Bit Depth"]?.description ??
+        metaData.BitDepth?.description ??
+        metaData["Bits Per Sample"]?.description ??
+        metaData.BitsPerSample?.description,
+      colorType:
+        metaData["Color Type"]?.description ??
+        metaData.ColorType?.description ??
+        metaData["Color Space"]?.description ??
+        metaData.ColorSpace?.description,
       subSampling: metaData["Subsampling"]?.description ?? metaData.YCbCrSubSampling?.description,
       compression: metaData.Compression?.description,
       filter: metaData.Filter?.description,
@@ -341,7 +363,10 @@ export const imageProps = async (imagePath: string): Promise<ImageProps> => {
       const metaData = imageSize(imagePath);
       return {
         isImage: true,
-        dimensions: typeof metaData.width !== "undefined" && typeof metaData.height !== "undefined" ? `${metaData.width} x ${metaData.height} pixels` : undefined,
+        dimensions:
+          typeof metaData.width !== "undefined" && typeof metaData.height !== "undefined"
+            ? `${metaData.width} x ${metaData.height} pixels`
+            : undefined,
         height: metaData.height,
         width: metaData.width,
         orientation: metaData.orientation,
@@ -361,17 +386,22 @@ export const imageProps = async (imagePath: string): Promise<ImageProps> => {
 export const audioProps = async (audioPath: string): Promise<AudioProps> => {
   try {
     const metaData = await ffprobePromise(audioPath);
-    const audio = metaData.streams.find(st => st.codec_type === 'audio') || {} as FfprobeStream;
+    const audio = metaData.streams.find((st) => st.codec_type === "audio") || ({} as FfprobeStream);
     const tags = metaData.format.tags || {};
 
     const duration = metaData.format.duration ?? 0;
     const durationMs = duration * 1000;
     const durationPretty = humanizeDuration(durationMs, { maxDecimalPoints: 2 });
 
-    const bitRate = parseInt(audio.bit_rate || '0', 10);
-    const bitRatePretty = bitRate ? convertBytes(bitRate, ['bps', 'kbps', 'mbps'], false) : undefined;
+    const bitRate = parseInt(audio.bit_rate || "0", 10);
+    const bitRatePretty = bitRate ? convertBytes(bitRate, ["bps", "kbps", "mbps"], false) : undefined;
 
-    const channels = typeof audio.channels !== 'undefined' ? audio.channel_layout ? `${audio.channels} (${audio.channel_layout})` : audio.channels : undefined;
+    const channels =
+      typeof audio.channels !== "undefined"
+        ? audio.channel_layout
+          ? `${audio.channels} (${audio.channel_layout})`
+          : audio.channels
+        : undefined;
 
     return {
       isAudio: true,
@@ -402,7 +432,7 @@ export const audioProps = async (audioPath: string): Promise<AudioProps> => {
 export const videoProps = async (videoPath: string): Promise<VideoProps> => {
   try {
     const metaData = await ffprobePromise(videoPath);
-    const video = metaData.streams.find(st => st.codec_type === 'video') || {} as FfprobeStream;
+    const video = metaData.streams.find((st) => st.codec_type === "video") || ({} as FfprobeStream);
 
     const dimensions = `${video.width} x ${video.height} pixels`;
 
@@ -410,8 +440,8 @@ export const videoProps = async (videoPath: string): Promise<VideoProps> => {
     const durationMs = duration * 1000;
     const durationPretty = humanizeDuration(durationMs, { maxDecimalPoints: 2 });
 
-    const bitRate = parseInt(video.bit_rate || '0', 10);
-    const bitRatePretty = bitRate ? convertBytes(bitRate, ['bps', 'kbps', 'mbps'], false) : undefined;
+    const bitRate = parseInt(video.bit_rate || "0", 10);
+    const bitRatePretty = bitRate ? convertBytes(bitRate, ["bps", "kbps", "mbps"], false) : undefined;
 
     const frameRate = video.r_frame_rate ? parseFloat(eval(video.r_frame_rate || "0").toFixed(2)) : undefined;
     const frameRatePretty = frameRate ? `${eval(video.r_frame_rate || "0").toFixed(2)} fps` : undefined;
@@ -446,8 +476,8 @@ export const videoProps = async (videoPath: string): Promise<VideoProps> => {
  */
 export const props = async (fsPath: string): Promise<Properties> => {
   const fsStats = await stat(fsPath);
-  const image: any = fsStats.mimeType?.includes('image') ? await imageProps(fsPath) : {};
-  const audio = fsStats.mimeType?.includes('audio') ? await audioProps(fsPath) : {};
-  const video = fsStats.mimeType?.includes('video') ? await videoProps(fsPath) : {};
+  const image: any = fsStats.mimeType?.includes("image") ? await imageProps(fsPath) : {};
+  const audio = fsStats.mimeType?.includes("audio") ? await audioProps(fsPath) : {};
+  const video = fsStats.mimeType?.includes("video") ? await videoProps(fsPath) : {};
   return { ...fsStats, ...image, ...audio, ...video };
 };
